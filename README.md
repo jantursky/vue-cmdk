@@ -48,7 +48,7 @@ The browser tests need Playwright's engines once per machine: `bunx playwright i
 
 ## Releasing a new version
 
-1. Move the entries under `## [Unreleased]` in `packages/vue-cmdk/CHANGELOG.md` into a new section, such as `## [0.2.0] - 2026-11-03`, and add its link at the bottom. Leave an empty `## [Unreleased]` section above it.
+1. Move the entries under `## [Unreleased]` in `packages/vue-cmdk/CHANGELOG.md` into a new section, such as `## [1.1.0] - 2026-11-03`, and add its link at the bottom. Leave an empty `## [Unreleased]` section above it.
 2. Set the same version in `packages/vue-cmdk/package.json`. The demo app and the docs read it from there.
 3. Run `bun run check && bun run build:docs`.
 4. Publish from the package folder. `prepublishOnly` runs the typecheck, both test suites, the build and the package checks first, and stops the publish if any fail:
@@ -58,9 +58,9 @@ The browser tests need Playwright's engines once per machine: `bunx playwright i
    bun publish --access public
    ```
 
-5. Tag the release in git (`v0.2.0`) and push the tag.
+5. Tag the release in git (`v1.1.0`) and push the tag.
 
-Before 1.0.0, a minor version may break things. Say so under **Changed** in the changelog.
+Versions follow semantic versioning: a breaking change needs a new major version, listed under **Changed** in the changelog.
 
 ## Deploying to Vercel
 

@@ -1,10 +1,10 @@
 # Changelog
 
-All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Until 1.0.0, a minor version may contain breaking changes, and they are called out under **Changed**.
+All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.1.0] - Not yet published
+## [1.0.0] - 2026-10-21
 
 The first version.
 
@@ -23,4 +23,4 @@ The first version.
 - An optional theme at `@jantursky/vue-cmdk/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
 
 [Unreleased]: https://www.npmjs.com/package/@jantursky/vue-cmdk
-[0.1.0]: https://www.npmjs.com/package/@jantursky/vue-cmdk/v/0.1.0
+[1.0.0]: https://www.npmjs.com/package/@jantursky/vue-cmdk/v/1.0.0
