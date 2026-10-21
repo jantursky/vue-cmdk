@@ -4,7 +4,7 @@
   `bun run typecheck` catches it when the API drifts away from them.
 */
 import { ref, useTemplateRef } from 'vue'
-import { CommandPaletteDialog, matchesChord, parseChord, useHotkey, type Command } from '@jantursky/vue-cmdk'
+import { CommandPaletteDialog, matchesChord, parseChord, useHotkey, type Command } from 'vue-cmdk-palette'
 
 const commands: Command[] = []
 const open = ref(false)

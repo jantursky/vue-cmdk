@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CommandPaletteDialog, type Command, type Scope } from '@jantursky/vue-cmdk'
+import { CommandPaletteDialog, type Command, type Scope } from 'vue-cmdk-palette'
 
 const open = ref(false)
 const log = ref<string[]>([])

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CommandPalette, type Command, type CommandContext } from '@jantursky/vue-cmdk'
+import { CommandPalette, type Command, type CommandContext } from 'vue-cmdk-palette'
 
 const last = ref('nothing yet')
 const run = (context: CommandContext): void => {

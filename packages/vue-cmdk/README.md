@@ -19,8 +19,8 @@ There are no runtime dependencies (Vue is a peer dependency), and the bundle is 
 ## Install
 
 ```sh
-bun add @jantursky/vue-cmdk
-# or: npm install @jantursky/vue-cmdk, pnpm add @jantursky/vue-cmdk, yarn add @jantursky/vue-cmdk
+bun add vue-cmdk-palette
+# or: npm install vue-cmdk-palette, pnpm add vue-cmdk-palette, yarn add vue-cmdk-palette
 ```
 
 `vue-cmdk` requires Vue `^3.5`.
@@ -30,8 +30,8 @@ bun add @jantursky/vue-cmdk
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CommandPaletteDialog, type Command } from '@jantursky/vue-cmdk'
-import '@jantursky/vue-cmdk/style.css'
+import { CommandPaletteDialog, type Command } from 'vue-cmdk-palette'
+import 'vue-cmdk-palette/style.css'
 
 const open = ref(false)
 
@@ -167,7 +167,7 @@ The row wrapper still owns selection, ARIA attributes, and clicks, so a custom `
 
 ```vue
 <script setup lang="ts">
-import { useCommandPalette } from '@jantursky/vue-cmdk'
+import { useCommandPalette } from 'vue-cmdk-palette'
 
 const palette = useCommandPalette({ commands, recents: false })
 </script>
@@ -239,7 +239,7 @@ Change the dialog's shortcut with `hotkey`, for example `hotkey="mod+shift+p"` o
 ## Theming
 
 ```ts
-import '@jantursky/vue-cmdk/style.css'
+import 'vue-cmdk-palette/style.css'
 ```
 
 The theme uses `--cmdk-*` custom properties. Override any of them on `:root` or on an ancestor of the palette:

@@ -49,7 +49,7 @@ Shortcuts without `alt` go by the character instead. That keeps them right on ot
 `hotkey` takes one shortcut. For more, turn it off and listen yourself, using the same helpers the dialog uses:
 
 ```ts
-import { matchesChord, parseChord, useHotkey } from '@jantursky/vue-cmdk'
+import { matchesChord, parseChord, useHotkey } from 'vue-cmdk-palette'
 
 const chords = ['mod+k', 'mod+shift+p', 'f1'].map((chord) => parseChord(chord))
 
@@ -83,7 +83,7 @@ Without a `v-model`, reach the dialog through a template ref. It exposes `show()
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { CommandPaletteDialog } from '@jantursky/vue-cmdk'
+import { CommandPaletteDialog } from 'vue-cmdk-palette'
 
 const palette = useTemplateRef<InstanceType<typeof CommandPaletteDialog>>('palette')
 </script>

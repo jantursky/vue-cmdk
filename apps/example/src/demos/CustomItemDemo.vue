@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CommandHighlight, CommandPaletteDialog, type Command } from '@jantursky/vue-cmdk'
+import { CommandHighlight, CommandPaletteDialog, type Command } from 'vue-cmdk-palette'
 
 import { logAction } from '../state'
 

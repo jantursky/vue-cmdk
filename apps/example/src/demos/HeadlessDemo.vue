@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCommandPalette, type Command } from '@jantursky/vue-cmdk'
+import { useCommandPalette, type Command } from 'vue-cmdk-palette'
 
 import { logAction } from '../state'
 

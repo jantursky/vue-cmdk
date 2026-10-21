@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { CommandPaletteDialog, formatChord, type Command } from '@jantursky/vue-cmdk'
+import { CommandPaletteDialog, formatChord, type Command } from 'vue-cmdk-palette'
 
 import { commands, groupOrder, scopes } from './commands'
 import CustomItemDemo from './demos/CustomItemDemo.vue'
@@ -95,7 +95,7 @@ const KEYS: [string, string][] = [
           </button>
         </div>
       </div>
-      <code class="install">bun add @jantursky/vue-cmdk</code>
+      <code class="install">bun add vue-cmdk-palette</code>
     </header>
 
     <main class="grid">
@@ -146,7 +146,7 @@ const KEYS: [string, string][] = [
 
     <footer class="footer">
       <a href="https://vue-cmdk-docs.vercel.app">Docs</a> · <a href="https://github.com/jantursky/vue-cmdk">GitHub</a> ·
-      <a href="https://www.npmjs.com/package/@jantursky/vue-cmdk">npm</a> · MIT licensed.
+      <a href="https://www.npmjs.com/package/vue-cmdk-palette">npm</a> · MIT licensed.
     </footer>
 
     <CommandPaletteDialog

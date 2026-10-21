@@ -12,7 +12,7 @@ A palette is a list of commands. Each one has an `id` (unique within its list), 
 | `page`   | `children`     | Opens a nested list. See [Nested pages](/guides/nested-pages).                                                      |
 
 ```ts
-import type { Command } from '@jantursky/vue-cmdk'
+import type { Command } from 'vue-cmdk-palette'
 
 const commands: Command[] = [
   { kind: 'link', id: 'billing', label: 'Billing', href: '/settings/billing', group: 'Settings' },

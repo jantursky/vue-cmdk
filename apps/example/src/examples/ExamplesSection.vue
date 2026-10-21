@@ -13,7 +13,7 @@ import themedSource from './ThemedExample.vue?raw'
 
 const setup = `import { createApp } from 'vue'
 // Optional: the default theme. Leave it out and nothing is styled.
-import '@jantursky/vue-cmdk/style.css'
+import 'vue-cmdk-palette/style.css'
 
 import App from './App.vue'
 

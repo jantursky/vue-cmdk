@@ -4,7 +4,7 @@
     "types": ["node", "vite/client"],
     "noEmit": true,
     "paths": {
-      "@jantursky/vue-cmdk": ["../../packages/vue-cmdk/src/index.ts"]
+      "vue-cmdk-palette": ["../../packages/vue-cmdk/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "vite.config.ts"]

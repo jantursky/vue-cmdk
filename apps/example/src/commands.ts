@@ -1,4 +1,4 @@
-import type { Command, Scope } from '@jantursky/vue-cmdk'
+import type { Command, Scope } from 'vue-cmdk-palette'
 
 import {
   IconBook,
@@ -134,7 +134,7 @@ export const commands: Command[] = [
     icon: IconLink,
     group: 'Actions',
     scope: 'actions',
-    href: 'https://www.npmjs.com/package/@jantursky/vue-cmdk',
+    href: 'https://www.npmjs.com/package/vue-cmdk-palette',
     hint: 'The package page, in this tab or a new one.',
     keywords: ['package', 'registry'],
     alternateLabel: 'Open in new tab',

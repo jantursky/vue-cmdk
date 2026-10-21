@@ -33,7 +33,7 @@ Every `action` and `link` is recorded when it runs, unless it sets `trackRecent:
 To keep recents on a server or in IndexedDB, pass an adapter. Both methods can be sync or async:
 
 ```ts
-import type { RecentsAdapter } from '@jantursky/vue-cmdk'
+import type { RecentsAdapter } from 'vue-cmdk-palette'
 
 const storage: RecentsAdapter = {
   load: () => api.get('/recents'),

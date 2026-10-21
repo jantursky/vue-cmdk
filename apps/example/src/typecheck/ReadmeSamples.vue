@@ -13,7 +13,7 @@ import {
   type RecentEntry,
   type RecentsAdapter,
   type Scope,
-} from '@jantursky/vue-cmdk'
+} from 'vue-cmdk-palette'
 
 const open = ref(false)
 

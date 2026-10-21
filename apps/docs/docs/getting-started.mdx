@@ -29,7 +29,7 @@ The components ship without styles. To use the default theme, import it once, us
 
 ```ts main.ts
 import { createApp } from 'vue'
-import '@jantursky/vue-cmdk/style.css'
+import 'vue-cmdk-palette/style.css'
 
 import App from './App.vue'
 
@@ -43,7 +43,7 @@ Leave this import out if you plan to write all the CSS yourself. [Styling](/guid
 ```vue App.vue
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CommandPaletteDialog, type Command } from '@jantursky/vue-cmdk'
+import { CommandPaletteDialog, type Command } from 'vue-cmdk-palette'
 
 const open = ref(false)
 

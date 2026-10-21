@@ -1,5 +1,5 @@
 /* Injected into every live preview frame, after Blume's defaults. */
-@import '@jantursky/vue-cmdk/style.css';
+@import 'vue-cmdk-palette/style.css';
 
 /* Preview frames size to their content, and a fixed dialog adds none, so the body grows while one is open. */
 :root {

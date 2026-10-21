@@ -21,7 +21,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@astrojs/vue": "^7.1.1",
-        "@jantursky/vue-cmdk": "workspace:*",
+        "vue-cmdk-palette": "workspace:*",
         "blume": "^2.2.4",
         "vue": "^3.5.0",
       },
@@ -30,7 +30,7 @@
       "name": "example",
       "version": "0.0.0",
       "dependencies": {
-        "@jantursky/vue-cmdk": "workspace:*",
+        "vue-cmdk-palette": "workspace:*",
         "vue": "^3.5.0",
       },
       "devDependencies": {
@@ -42,7 +42,7 @@
       },
     },
     "packages/vue-cmdk": {
-      "name": "@jantursky/vue-cmdk",
+      "name": "vue-cmdk-palette",
       "version": "0.1.0",
       "devDependencies": {
         "@arethetypeswrong/cli": "^0.18.5",
@@ -350,7 +350,7 @@
 
     "@isaacs/fs-minipass": ["@isaacs/fs-minipass@4.0.1", "", { "dependencies": { "minipass": "^7.0.4" } }, "sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w=="],
 
-    "@jantursky/vue-cmdk": ["@jantursky/vue-cmdk@workspace:packages/vue-cmdk"],
+    "vue-cmdk-palette": ["vue-cmdk-palette@workspace:packages/vue-cmdk"],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 

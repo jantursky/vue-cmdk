@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CommandPaletteDialog, type Command } from '@jantursky/vue-cmdk'
+import { CommandPaletteDialog, type Command } from 'vue-cmdk-palette'
 
 const open = ref(false)
 const last = ref('nothing yet')

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CommandPalette } from '@jantursky/vue-cmdk'
+import { CommandPalette } from 'vue-cmdk-palette'
 
 import { commands, groupOrder } from '../commands'
 import { logAction } from '../state'

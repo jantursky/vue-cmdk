@@ -20,7 +20,7 @@ The first version.
 - A detail panel, quick-select with ⌘/Ctrl+1-9, layered Escape, and a live region that announces the result count.
 - Slots for rows, group headings, the empty and loading states, the detail panel, the footer, the breadcrumb and the field prefix.
 - Replaceable labels for every built-in string.
-- An optional theme at `@jantursky/vue-cmdk/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
+- An optional theme at `vue-cmdk-palette/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
 
-[Unreleased]: https://www.npmjs.com/package/@jantursky/vue-cmdk
-[1.0.0]: https://www.npmjs.com/package/@jantursky/vue-cmdk/v/1.0.0
+[Unreleased]: https://www.npmjs.com/package/vue-cmdk-palette
+[1.0.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.0.0

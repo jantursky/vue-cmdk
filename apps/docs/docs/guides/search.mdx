@@ -37,7 +37,7 @@ If you render rows yourself, the `CommandHighlight` component draws the same mar
 Pass `filter` to replace matching and ranking. It returns `null` for no match, or a score where lower is better:
 
 ```ts
-import type { FilterFn } from '@jantursky/vue-cmdk'
+import type { FilterFn } from 'vue-cmdk-palette'
 
 const filter: FilterFn = (command, needle) => (command.label.startsWith(needle) ? 0 : null)
 ```

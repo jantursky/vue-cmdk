@@ -8,7 +8,7 @@ const lib = (path: string) => fileURLToPath(new URL(`../../packages/vue-cmdk/${p
 const { version } = JSON.parse(readFileSync(lib('package.json'), 'utf8')) as { version: string }
 
 // The dev server reads the library's source so edits hot-reload across packages.
-// Builds resolve `@jantursky/vue-cmdk` through node_modules, i.e. the library's real dist output.
+// Builds resolve `vue-cmdk-palette` through node_modules, i.e. the library's real dist output.
 export default defineConfig(({ command }) => ({
   plugins: [vue()],
   define: {
@@ -18,8 +18,8 @@ export default defineConfig(({ command }) => ({
     alias:
       command === 'serve'
         ? [
-            { find: /^@jantursky\/vue-cmdk\/style\.css$/, replacement: lib('src/styles/theme.css') },
-            { find: /^@jantursky\/vue-cmdk$/, replacement: lib('src/index.ts') },
+            { find: /^vue-cmdk-palette\/style\.css$/, replacement: lib('src/styles/theme.css') },
+            { find: /^vue-cmdk-palette$/, replacement: lib('src/index.ts') },
           ]
         : [],
   },

@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import '@jantursky/vue-cmdk/style.css'
+import 'vue-cmdk-palette/style.css'
 
 import App from './App.vue'
 import './styles.css'

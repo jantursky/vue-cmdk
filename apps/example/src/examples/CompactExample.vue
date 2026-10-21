@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { CommandPalette, type Command } from '@jantursky/vue-cmdk'
+import { CommandPalette, type Command } from 'vue-cmdk-palette'
 
 const last = ref('nothing yet')
 

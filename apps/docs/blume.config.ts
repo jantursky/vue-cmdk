@@ -18,7 +18,7 @@ export default defineConfig({
   navigation: {
     actions: [
       { href: 'https://vue-cmdk.vercel.app', label: 'Demo' },
-      { href: 'https://www.npmjs.com/package/@jantursky/vue-cmdk', label: 'npm' },
+      { href: 'https://www.npmjs.com/package/vue-cmdk-palette', label: 'npm' },
     ],
   },
   content: {

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "vue": "^3.5.0",
-    "@jantursky/vue-cmdk": "workspace:*"
+    "vue-cmdk-palette": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22",

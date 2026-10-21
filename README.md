@@ -2,7 +2,7 @@
 
 # vue-cmdk
 
-[Docs](https://vue-cmdk-docs.vercel.app) · [Demo](https://vue-cmdk.vercel.app) · [npm](https://www.npmjs.com/package/@jantursky/vue-cmdk) · [Changelog](packages/vue-cmdk/CHANGELOG.md)
+[Docs](https://vue-cmdk-docs.vercel.app) · [Demo](https://vue-cmdk.vercel.app) · [npm](https://www.npmjs.com/package/vue-cmdk-palette) · [Changelog](packages/vue-cmdk/CHANGELOG.md)
 
 A small, accessible command palette for Vue 3. This repository holds the library, a demo app and the docs site.
 
