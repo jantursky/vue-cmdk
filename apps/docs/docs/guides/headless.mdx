@@ -1,0 +1,51 @@
+---
+title: Headless
+description: Use the palette's state and ARIA wiring with your own markup.
+---
+
+`useCommandPalette()` is the logic behind both components: the query, the ranked list, the selection, pages, scopes, recents and keyboard handling. It renders nothing. Reach for it when your design system already has an input and a list, or when the palette lives somewhere a dialog doesn't fit.
+
+```vue
+<script setup lang="ts">
+import { useCommandPalette } from '@jantursky/vue-cmdk'
+
+const palette = useCommandPalette({ commands, recents: false })
+</script>
+
+<template>
+  <div @keydown="palette.onContainerKeydown">
+    <input v-model="palette.query.value" v-bind="palette.fieldAttrs.value" @keydown="palette.onFieldKeydown" />
+    <ul v-bind="palette.listAttrs.value">
+      <li
+        v-for="row in palette.list.value.rows"
+        :key="row.command.id"
+        v-bind="palette.rowAttrs(row)"
+        @pointermove="palette.hover(row)"
+        @click="palette.activate(row)"
+      >
+        {{ row.command.label }}
+      </li>
+    </ul>
+  </div>
+</template>
+```
+
+## What the getters do
+
+The attribute getters (`fieldAttrs`, `listAttrs`, `rowAttrs`, `groupAttrs`, `chipAttrs`) fill in the ids, roles, and `aria-*` attributes, so your markup only has to bind them. `rowAttrs` and `chipAttrs` also set `data-cmdk-item` and `data-cmdk-chip` with their state attributes, so the theme's row and chip styles apply to headless markup. Add the other hooks yourself (`data-cmdk-root`, `data-cmdk-input`, `data-cmdk-list`) if you want the rest of the theme.
+
+`onFieldKeydown` handles the arrows, Home and End, Enter, quick-select, Tab between scopes, Backspace and Escape. `onContainerKeydown` handles the keys that should work wherever focus sits inside the palette.
+
+## Hover
+
+Bind `hover` to `pointermove`, not `pointerenter`. The list scrolls under a still pointer while someone uses the arrow keys, and an enter event would steal the selection from the keyboard.
+
+## Groups
+
+`palette.list.value.groups` holds the same rows filed under their headings, in drawn order. Render groups when you want headings, or `rows` for a flat list. Selection follows `rows` either way.
+
+## Read-only state
+
+`pages`, `loading` and the recents list are read-only, at runtime as well as in the types. Change them through the functions the composable returns (`activate`, `back`, `reset`, `close`). `query` and `scope` are writable, because they're the inputs you bind.
+
+The full option and return lists are in the [composable reference](/reference/composable).

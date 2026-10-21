@@ -1,0 +1,46 @@
+---
+title: Recents
+description: Pin the commands people use most, and store them wherever you like.
+---
+
+Recents are on by default and live in `localStorage`. When the query is empty, commands someone has picked before show up first in a "Recent" group.
+
+They're ranked by a score that mixes how often and how recently a command was used: its use count, plus a bonus that fades to nothing over thirty days. The palette keeps 30 entries and shows 5.
+
+## Options
+
+```vue
+<CommandPaletteDialog :commands="commands" :recents="{ namespace: user.id, display: 5 }" />
+<CommandPaletteDialog :commands="commands" :recents="false" />
+```
+
+| option      | default            | meaning                                                          |
+| ----------- | ------------------ | ---------------------------------------------------------------- |
+| `key`       | `vue-cmdk:recents` | The `localStorage` key for the default adapter.                  |
+| `namespace` | none               | Keeps separate lists under one key, for example one per account. |
+| `max`       | `30`               | Entries kept in storage.                                         |
+| `display`   | `5`                | Entries shown in the Recent group.                               |
+| `storage`   | `localStorage`     | Your own adapter. See below.                                     |
+
+Two palettes on one page should use different keys or namespaces, or they will share a list.
+
+## What gets recorded
+
+Every `action` and `link` is recorded when it runs, unless it sets `trackRecent: false`. Opening a `page` isn't recorded. Ids that no longer match a command are skipped when the list is drawn, so a removed command never leaves a dead row behind.
+
+## Your own storage
+
+To keep recents on a server or in IndexedDB, pass an adapter. Both methods can be sync or async:
+
+```ts
+import type { RecentsAdapter } from '@jantursky/vue-cmdk'
+
+const storage: RecentsAdapter = {
+  load: () => api.get('/recents'),
+  save: (entries) => api.put('/recents', entries),
+}
+```
+
+Whatever `load` returns is checked, and malformed entries are dropped. If someone picks a command before an async `load` has finished, the pick is kept and merged in once the stored list arrives.
+
+The default adapter swallows storage errors, such as a private window with storage blocked, so recents stay empty.

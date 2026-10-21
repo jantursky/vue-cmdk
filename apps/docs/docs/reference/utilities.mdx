@@ -1,0 +1,44 @@
+---
+title: Utilities and types
+description: The framework-free helpers and TypeScript types the package exports.
+---
+
+The palette's rules live in plain functions with no Vue or DOM dependency. They're exported for headless builds, tests, and anyone who wants the same ranking elsewhere.
+
+## Search and lists
+
+| export                                    | does                                                                                |
+| ----------------------------------------- | ----------------------------------------------------------------------------------- |
+| `buildList(input)`                        | Turns commands, a query, scopes and recents into the grouped, ranked `PaletteList`. |
+| `MAX_RESULTS`                             | The default row cap, `40`.                                                          |
+| `matchQuery(text, query)`                 | Splits text into highlight segments, or returns `null` for no match.                |
+| `rankMatch(label, keywords, hint, query)` | The built-in score. Lower is better, `Infinity` for no match.                       |
+| `parseQuery(query, scopes)`               | Splits a typed scope prefix from the text to match.                                 |
+| `withoutScopePrefix(query, scopes)`       | The query with a leading prefix removed.                                            |
+| `nextScope(current, step, scopes)`        | The next chip in the ring, "All" included.                                          |
+| `countByScope(rows, scopes)`              | Matches per scope id.                                                               |
+
+## Keys
+
+| export                                    | does                                                              |
+| ----------------------------------------- | ----------------------------------------------------------------- |
+| `parseChord('mod+shift+k')`               | Parses a chord string.                                            |
+| `matchesChord(event, chord)`              | Whether a keyboard event matches a parsed chord.                  |
+| `formatChord('mod+k')`                    | Display text for the platform: `⌘K` on Apple, `Ctrl+K` elsewhere. |
+| `chordCaps(chord)`, `shortcutCaps(value)` | Key caps for drawing, as an array.                                |
+| `isApplePlatform()`                       | The check behind `mod`.                                           |
+
+## Recents storage
+
+| export                                | does                                                     |
+| ------------------------------------- | -------------------------------------------------------- |
+| `createLocalStorageAdapter(options?)` | The default adapter, with your own `key` or `namespace`. |
+| `RECENTS_STORAGE_KEY`                 | `'vue-cmdk:recents'`.                                    |
+
+## Other
+
+`DEFAULT_LABELS`, `COMMAND_PALETTE_KEY` (the injection key behind `useCommandPaletteContext`), and the `CommandHighlight` component, which draws highlight segments as text and `<mark>` elements.
+
+## Types
+
+`Command`, `ActionCommand`, `LinkCommand`, `PageCommand`, `CommandContext`, `CommandIcon`, `ActivationMode`, `Scope`, `ScopeChoice`, `FilterFn`, `PaletteLabels`, `PaletteList`, `RankedGroup`, `RankedRow`, `RecentEntry`, `RecentsAdapter`, `RecentsOptions`, `Awaitable`, `Chord`, plus the props, emits and return types of each component and composable.

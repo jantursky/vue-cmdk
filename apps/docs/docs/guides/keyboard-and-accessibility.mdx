@@ -1,0 +1,38 @@
+---
+title: Keyboard and accessibility
+description: Every key the palette handles, and how it works with screen readers.
+---
+
+## Keys
+
+| key                 | action                                                               |
+| ------------------- | -------------------------------------------------------------------- |
+| ⌘K / Ctrl+K         | Open or close the palette (dialog).                                  |
+| `/`                 | Open the palette when focus isn't in a field (with `open-on-slash`). |
+| ↑ ↓, Home End       | Move the selection. It wraps and skips disabled rows.                |
+| ↵                   | Activate the selected row.                                           |
+| ⌘↵ / Ctrl+↵         | Alternate activation, for example opening a link in a new tab.       |
+| ⌘1-9 / Ctrl+1-9     | Activate the row at that position. Add ⇧ for alternate activation.   |
+| ⇥ / ⇧⇥              | Next or previous scope.                                              |
+| ⌫ on an empty field | Go back one page.                                                    |
+| Esc                 | Clear the query, then go back one page, then close.                  |
+
+The dialog's shortcut is set with `hotkey`, using `mod` for ⌘ on Apple platforms and Ctrl elsewhere: `hotkey="mod+shift+p"`. [Opening the palette](/guides/opening-the-palette) covers the syntax, Option shortcuts on a Mac, several shortcuts at once, and opening from code. Quick-select digits come from the physical key, so they work on keyboard layouts where the digits need Shift. Turn them off with `:quick-select="false"`.
+
+Keys are ignored while an input method editor is composing text, so typing Japanese or Chinese into the field doesn't trigger Enter or the arrows.
+
+## Screen readers
+
+The field is a `combobox` that controls a `listbox`. Rows are `option`s, and the selected one is announced through `aria-activedescendant`, so focus never leaves the field. Disabled rows carry `aria-disabled`, and groups are labelled by their headings.
+
+A polite live region announces the result count after each change to the query.
+
+## Focus
+
+The dialog is a labelled modal (`role="dialog"`, `aria-modal="true"`). While it's open, Tab stays inside it, the page behind it doesn't scroll, and closing it returns focus to whatever had it before. Set `:trap-focus="false"` if your app manages focus itself.
+
+The inline palette doesn't trap focus or lock scrolling. It focuses its field on mount unless `autofocus` is `false`.
+
+## Pointer
+
+Moving the pointer over a row selects it, but a row scrolling under a still pointer doesn't, so the keyboard keeps control of the selection while the list scrolls.

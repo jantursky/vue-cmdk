@@ -1,0 +1,48 @@
+---
+title: Examples
+description: Live palettes from minimal to fully featured, each next to the exact file that runs it.
+sidebar:
+  order: 4
+---
+
+Each preview runs a single, self-contained component. Switch to the **Code** tab to read it. The same files run in the demo app under `apps/example`, so the two never drift apart.
+
+The only global setup is the theme import from [Getting started](/getting-started#import-the-theme).
+
+## Minimal
+
+Three commands and the dialog with its defaults, which is all a palette needs. The `hotkey` is off only so it doesn't clash with the other palettes in the demo app, which already use ⌘K.
+
+<Component path="MinimalExample" />
+
+## Compact
+
+A dense inline palette for a toolbar or sidebar: smaller rows, no footer, and no quick-select digits. The density comes from two variables and three rules on the `data-cmdk-*` hooks.
+
+<Component path="CompactExample" />
+
+## Full
+
+Most of what the library does, in one place:
+
+- scope chips with `>` and `@` prefixes
+- a nested page whose rows load from a promise
+- links routed through `navigate`, and a ⌘/Ctrl+Enter alternate action
+- a disabled row with a reason, and a hidden row that only search finds
+- shortcuts, badges, hints and the detail panel
+- recents in their own namespace
+- the `select` and `error` events
+
+<Component path="FullExample" />
+
+## Theme variables
+
+A warm, serif theme made with `--cmdk-*` variables and nothing else. Variables are inherited, so you can set them on `:root` for the whole app or on a wrapper to theme one palette.
+
+<Component path="ThemedExample" />
+
+## Custom CSS
+
+When variables aren't enough, every part of the palette has a `data-cmdk-*` attribute and every state is a data attribute too. This terminal look restyles the selected row, prefixes each row and heading, and strikes through disabled rows.
+
+<Component path="TerminalExample" />

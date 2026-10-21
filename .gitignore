@@ -6,13 +6,13 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# database
+# Database
 *.sqlite
 
-# package-json
+# Package-json
 package-json.lock
 
-# bun deploy file
+# Bun deploy file
 node_modules.bun
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
@@ -31,7 +31,7 @@ lib-cov
 coverage
 *.lcov
 
-# nyc test coverage
+# NYC test coverage
 .nyc_output
 
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
@@ -40,7 +40,7 @@ coverage
 # Bower dependency directory (https://bower.io/)
 bower_components
 
-# node-waf configuration
+# Node-waf configuration
 .lock-wscript
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
@@ -48,6 +48,7 @@ build/Release
 
 # Dependency directories
 node_modules/
+jspm_packages/
 jspm_packages/
 
 # TypeScript v1 declaration files
@@ -77,11 +78,13 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# Dotenv environment variables file & local overrides
 .env
 .env.test
+.env.*
+*.local
 
-# parcel-bundler cache (https://parceljs.org/)
+# Parcel-bundler cache (https://parceljs.org/)
 .cache
 
 # Next.js build output
@@ -93,11 +96,8 @@ dist
 
 # Gatsby files
 .cache/
-# Comment in the public line in if your project uses Gatsby and *not* Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
-# public
 
-# vuepress build output
+# Vuepress build output
 .vuepress/dist
 
 # Serverless directories
@@ -111,3 +111,19 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Additional builds & Blume
+.blume/
+.blume-verify/
+
+# Deploy
+.vercel/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Copied from packages/vue-cmdk/CHANGELOG.md by the docs build
+apps/docs/docs/_generated/

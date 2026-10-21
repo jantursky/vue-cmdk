@@ -1,0 +1,9 @@
+dist/
+coverage/
+node_modules/
+bun.lock
+docs/inspirations/
+openspec/
+.blume/
+apps/docs/docs/_generated/
+.blume-verify/

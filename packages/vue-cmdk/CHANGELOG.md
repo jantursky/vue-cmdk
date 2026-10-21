@@ -1,0 +1,26 @@
+# Changelog
+
+All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Until 1.0.0, a minor version may contain breaking changes, and they are called out under **Changed**.
+
+## [Unreleased]
+
+## [0.1.0] - Not yet published
+
+The first version.
+
+### Added
+
+- `<CommandPaletteDialog>`: a modal palette with a global hotkey (`mod+k` by default), optional `/` to open, a focus trap, focus restore and a scroll lock. Shortcuts with ⌥/Alt match the physical key, so they also work on a Mac.
+- `<CommandPalette>`: the same palette rendered inline.
+- `useCommandPalette()`: the headless state machine, with attribute getters for the WAI-ARIA combobox and listbox pattern.
+- Three kinds of command: `action`, `link` (with a new-tab alternate action) and `page` (nested lists, loaded from an array or a sync or async function).
+- Substring search over labels, keywords and hints, ranked label prefix, label infix, keyword, then hint. Typographic quotes and dashes match their keyboard forms. A custom `filter` can replace the matcher.
+- Scope chips, with Tab and Shift+Tab to cycle and optional typed prefixes such as `>`.
+- Recents ranked by frequency and recency, stored in `localStorage` (versioned and namespaced) or through a custom adapter.
+- A detail panel, quick-select with ⌘/Ctrl+1-9, layered Escape, and a live region that announces the result count.
+- Slots for rows, group headings, the empty and loading states, the detail panel, the footer, the breadcrumb and the field prefix.
+- Replaceable labels for every built-in string.
+- An optional theme at `@jantursky/vue-cmdk/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
+
+[Unreleased]: https://www.npmjs.com/package/@jantursky/vue-cmdk
+[0.1.0]: https://www.npmjs.com/package/@jantursky/vue-cmdk/v/0.1.0

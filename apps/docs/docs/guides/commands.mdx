@@ -1,0 +1,71 @@
+---
+title: Commands
+description: The three kinds of command, and every optional field they share.
+---
+
+A palette is a list of commands. Each one has an `id` (unique within its list), a `label`, and a `kind` that decides what happens when someone picks it.
+
+| kind     | required       | on activation                                                                                                       |
+| -------- | -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `action` | `perform(ctx)` | Closes the palette, then calls `perform({ command, mode, close })`. The function can be async.                      |
+| `link`   | `href`         | Calls `navigate(href)`, or assigns `location.href` when no `navigate` is given. The alternate mode opens a new tab. |
+| `page`   | `children`     | Opens a nested list. See [Nested pages](/guides/nested-pages).                                                      |
+
+```ts
+import type { Command } from '@jantursky/vue-cmdk'
+
+const commands: Command[] = [
+  { kind: 'link', id: 'billing', label: 'Billing', href: '/settings/billing', group: 'Settings' },
+  {
+    kind: 'action',
+    id: 'sign-out',
+    label: 'Sign out',
+    group: 'Account',
+    perform: async () => {
+      await auth.signOut()
+    },
+  },
+]
+```
+
+## Optional fields
+
+| field            | meaning                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------- |
+| `group`          | The heading the row is filed under.                                                   |
+| `scope`          | The id of a scope chip (see [Scopes](/guides/scopes)).                                |
+| `hint`           | A one-line description. It is searched and shown in the detail panel.                 |
+| `keywords`       | Words someone might type that aren't in the label.                                    |
+| `icon`           | A component or a string, such as an emoji.                                            |
+| `shortcut`       | Key caps printed on the row: `'mod+shift+c'` or `['⌥', 'W']`.                         |
+| `badge`          | A short tag next to the label.                                                        |
+| `disabled`       | `true`, or a reason string that is shown on the row. Disabled rows can't be selected. |
+| `hidden`         | The row isn't listed for an empty query, but search still finds it.                   |
+| `keepOpen`       | The palette stays open after activation.                                              |
+| `trackRecent`    | Set to `false` to keep the command out of recents.                                    |
+| `alternateLabel` | The footer hint for ⌘/Ctrl+Enter, such as `Open in new tab`.                          |
+| `verb`           | The word for what Enter does. The default is `run` for actions and `open` otherwise.  |
+| `placeholder`    | `page` commands only: the field placeholder while the page is open.                   |
+| `meta`           | Free-form data for your own slots. The palette never reads it.                        |
+
+`shortcut` is display only. The palette prints the caps, but binding the key is up to your app.
+
+## The perform context
+
+`perform` receives `{ command, mode, close }`:
+
+- `command` is the command that ran, handy when several commands share one function.
+- `mode` is `'primary'` for Enter or a click, and `'alternate'` for ⌘/Ctrl+Enter or a modified click.
+- `close()` closes the palette. It has already been called before `perform` runs, unless the command sets `keepOpen`.
+
+## Errors
+
+If `perform` throws or rejects, or a page's `children` loader does, the palette catches it and emits `error(error, command)`. Nothing is logged for you, so listen for it if you want to show a toast:
+
+```vue
+<CommandPaletteDialog :commands="commands" @error="(error, command) => toast(`${command.label} failed`)" />
+```
+
+## Changing the list
+
+`commands` is reactive. Replace the array, or pass a `computed`, and the palette updates while it's open. In development the palette logs a warning for each duplicate id, since recents depend on ids being unique.

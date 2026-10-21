@@ -1,0 +1,87 @@
+{
+  "name": "@jantursky/vue-cmdk",
+  "version": "0.1.0",
+  "description": "Lightweight, accessible command palette for Vue 3: headless composable plus a ready-made dialog component.",
+  "license": "MIT",
+  "author": {
+    "name": "Jan Tursky",
+    "email": "jan.tursky@gmail.com",
+    "url": "https://jantursky.com"
+  },
+  "homepage": "https://vue-cmdk-docs.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jantursky/vue-cmdk.git",
+    "directory": "packages/vue-cmdk"
+  },
+  "bugs": {
+    "url": "https://github.com/jantursky/vue-cmdk/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "keywords": [
+    "vue",
+    "vue3",
+    "command-palette",
+    "cmdk",
+    "command-menu",
+    "combobox",
+    "a11y"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test:coverage": "vitest run --coverage",
+    "test:browser": "vitest run --config vitest.browser.config.ts",
+    "lint:package": "publint --strict && attw --pack . --profile node16 --exclude-entrypoints style.css",
+    "prepublishOnly": "bun run typecheck && bun run test && bun run test:browser && bun run build && bun run lint:package"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@microsoft/api-extractor": "^7.59.4",
+    "@types/node": "^22",
+    "@vitejs/plugin-vue": "^6",
+    "@vitest/browser-playwright": "5.0.5",
+    "@vitest/coverage-v8": "5.0.5",
+    "@vue/test-utils": "^2",
+    "happy-dom": "^21.0.4",
+    "playwright": "^1.64.1",
+    "publint": "^0.3.25",
+    "typescript": "~5.9.3",
+    "vite": "^8",
+    "vite-plugin-dts": "^5",
+    "vitest": "^5",
+    "vue": "^3.5.0",
+    "vue-tsc": "^3"
+  }
+}

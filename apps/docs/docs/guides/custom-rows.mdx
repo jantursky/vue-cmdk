@@ -1,0 +1,45 @@
+---
+title: Custom rows and slots
+description: Replace parts of the palette's markup without losing keyboard support.
+---
+
+Every visible part of the palette has a slot. The row wrapper still owns selection, ARIA attributes, and clicks, so a custom `item` can't break keyboard use.
+
+```vue
+<CommandPaletteDialog :commands="people">
+  <template #item="{ command, label, selected }">
+    <span class="avatar" :data-on="selected">{{ command.meta?.initials }}</span>
+    <CommandHighlight :segments="label" />
+  </template>
+</CommandPaletteDialog>
+```
+
+`#item` replaces the whole inside of the row, including the icon, shortcut and badge. If only some rows need custom content, render the rest yourself too, or give those commands their own palette.
+
+## Slots
+
+| slot            | props                                                    |
+| --------------- | -------------------------------------------------------- |
+| `item`          | `row, command, label, selected, disabled, reason, digit` |
+| `group-heading` | `group, heading, count`                                  |
+| `empty`         | `query, labels`                                          |
+| `loading`       |                                                          |
+| `detail`        | `row, verb` (rendered only with `show-detail`)           |
+| `footer`        | `list, selected, verb`                                   |
+| `breadcrumb`    | `trail`                                                  |
+| `input-prefix`  |                                                          |
+
+In the `item` slot, `reason` is the disabled reason (an empty string for a plain `disabled: true`, `null` when enabled), and `digit` is the quick-select number, or `null`.
+
+## Labels
+
+Every built-in string can be replaced through `labels`. Pass only the ones you want to change:
+
+```vue
+<CommandPaletteDialog
+  :commands="commands"
+  :labels="{ placeholder: 'Befehl suchen…', empty: 'Keine Treffer', results: '{count} Treffer' }"
+/>
+```
+
+`results`, `resultsOne` and `capped` are templates: `{count}`, `{shown}` and `{matched}` are filled in. The full list is in the [reference](/reference/components#labels).

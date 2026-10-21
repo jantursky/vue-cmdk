@@ -1,0 +1,81 @@
+---
+title: Composable
+description: Options and return values of useCommandPalette, plus the smaller composables it is built from.
+---
+
+## useCommandPalette(options)
+
+```ts
+import { useCommandPalette } from '@jantursky/vue-cmdk'
+
+const palette = useCommandPalette({ commands, scopes, onSelect: (command) => console.log(command.id) })
+```
+
+Options marked "ref or getter" accept a plain value, a `ref`, or a getter function, and stay reactive.
+
+| option        | type                                       | notes                                                              |
+| ------------- | ------------------------------------------ | ------------------------------------------------------------------ |
+| `commands`    | `Command[]`, ref or getter                 | Required.                                                          |
+| `scopes`      | `Scope[]`, ref or getter                   |                                                                    |
+| `groupOrder`  | `string[]`, ref or getter                  | Heading order for the empty query.                                 |
+| `maxResults`  | `number`, ref or getter                    | Default `40`.                                                      |
+| `filter`      | `FilterFn` or a ref of one                 | A getter isn't accepted here, since a filter is itself a function. |
+| `recents`     | `RecentsOptions \| boolean`, ref or getter | Default `true`.                                                    |
+| `quickSelect` | `boolean`, ref or getter                   | Default `true`.                                                    |
+| `labels`      | `Partial<PaletteLabels>`, ref or getter    |                                                                    |
+| `query`       | `Ref<string>`                              | Bring your own query state, for example from `defineModel`.        |
+| `navigate`    | `(href) => void`                           | Router hook for `link` commands.                                   |
+| `onSelect`    | `(command, mode) => void`                  |                                                                    |
+| `onError`     | `(error, command) => void`                 |                                                                    |
+| `onClose`     | `() => void`                               | Called when the palette asks to close.                             |
+
+### State
+
+| key            | type                                  | notes                                                     |
+| -------------- | ------------------------------------- | --------------------------------------------------------- |
+| `query`        | `Ref<string>`                         | Writable.                                                 |
+| `scope`        | `Ref<string \| null>`                 | The chosen chip. Writable. `null` is "All".               |
+| `activeScope`  | `ComputedRef<string \| null>`         | The scope in force, which a typed prefix may override.    |
+| `scopes`       | `ComputedRef<Scope[]>`                | Chips to draw: none on child pages.                       |
+| `pages`        | read-only ref of open pages           | Each entry has `command` and `items`.                     |
+| `currentPage`  | `ComputedRef`                         | The open page, or `undefined` at the root.                |
+| `loading`      | read-only `Ref<boolean>`              | A page loader is pending.                                 |
+| `list`         | `ComputedRef<PaletteList>`            | `groups`, `rows`, `matched`, `counts`, `total`, `needle`. |
+| `reachable`    | `ComputedRef<RankedRow[]>`            | Enabled rows in drawn order.                              |
+| `selected`     | `ComputedRef<RankedRow \| undefined>` |                                                           |
+| `labels`       | `ComputedRef<PaletteLabels>`          | Defaults merged with yours.                               |
+| `placeholder`  | `ComputedRef<string>`                 | Changes on pages that set one.                            |
+| `breadcrumb`   | `ComputedRef<string[]>`               | Labels of the open pages.                                 |
+| `announcement` | `ComputedRef<string>`                 | Text for a polite live region.                            |
+| `ids`          | `{ field, list, live }`               | Element ids used by the getters.                          |
+
+### Actions
+
+| key                         | does                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| `move(step)`                | Moves the selection, wrapping.                                               |
+| `moveTo('first' \| 'last')` | Jumps to an end.                                                             |
+| `hover(row)`                | Selects a row if it's enabled.                                               |
+| `activate(target, mode?)`   | Runs a row or command. Returns a promise.                                    |
+| `narrow(scope)`             | Picks a chip.                                                                |
+| `cycleScope(step)`          | Next or previous chip.                                                       |
+| `back()`                    | Leaves the current page. Returns `false` at the root.                        |
+| `escape()`                  | Clears, goes back, or closes. Returns `'cleared'`, `'popped'` or `'closed'`. |
+| `reset()`                   | Back to the root with an empty query.                                        |
+| `close()`                   | Resets and calls `onClose`.                                                  |
+
+### Helpers and getters
+
+`isSelected(row)`, `disabledReason(command)`, `quickSelectDigit(row)`, `onFieldKeydown(event)`, `onContainerKeydown(event)`, `fieldAttrs`, `listAttrs`, `rowAttrs(row)`, `groupAttrs(group)`, `chipAttrs(scope)`, `optionId(row)` and `headingId(group)`. See [Headless](/guides/headless) for how they fit together.
+
+## Smaller composables
+
+These are what the components use internally, exported for headless builds.
+
+| composable                        | does                                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `useRecents(options)`             | Loads, ranks and records recents. Returns `entries`, `enabled`, `record(id)`, `resolve(commands)`.      |
+| `useHotkey(handler, options?)`    | A capture-phase `keydown` listener (on `document` unless `target` is set), removed on unmount.          |
+| `useFocusTrap(container, active)` | Keeps Tab inside an element and restores focus when it deactivates.                                     |
+| `useScrollLock(active)`           | Sets `overflow: hidden` on `body` while active and restores the old value.                              |
+| `useCommandPaletteContext()`      | In a component rendered inside a palette's slots, that palette's composable return. Throws outside one. |

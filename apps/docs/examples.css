@@ -1,0 +1,35 @@
+/* Injected into every live preview frame, after Blume's defaults. */
+@import '@jantursky/vue-cmdk/style.css';
+
+/* Preview frames size to their content, and a fixed dialog adds none, so the body grows while one is open. */
+:root {
+  --cmdk-top: 16px;
+  --cmdk-max-height: 380px;
+}
+
+body {
+  padding: 16px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+body:has([data-cmdk-overlay]) {
+  min-height: 460px;
+}
+
+.button {
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 14px;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 8px;
+}
+
+.note,
+.log {
+  margin: 12px 0 0;
+  font-size: 13px;
+  opacity: 0.75;
+}

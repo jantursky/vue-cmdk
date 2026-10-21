@@ -1,0 +1,97 @@
+---
+title: Opening the palette
+description: Change the shortcut, add more of them, open on slash, or open the palette from your own code.
+---
+
+`<CommandPaletteDialog>` opens and closes with <kbd>⌘</kbd> <kbd>K</kbd> on a Mac and <kbd>Ctrl</kbd> <kbd>K</kbd> elsewhere. You can change that.
+
+## A different shortcut
+
+Pass the shortcut to `hotkey`:
+
+```vue
+<CommandPaletteDialog v-model:open="open" :commands="commands" hotkey="mod+shift+p" />
+```
+
+A shortcut is modifiers and one key, joined with `+`:
+
+| part                | meaning                                                    |
+| ------------------- | ---------------------------------------------------------- |
+| `mod`               | ⌘ on Apple platforms, Ctrl everywhere else.                |
+| `ctrl` or `control` | Ctrl on every platform.                                    |
+| `meta` or `cmd`     | ⌘ on a Mac, the Windows key elsewhere.                     |
+| `alt` or `option`   | ⌥ on a Mac, Alt elsewhere.                                 |
+| `shift`             | Shift.                                                     |
+| the key             | A character (`k`, `/`, `?`) or a key name (`f1`, `enter`). |
+
+Key names also accept `esc`, `return`, `space`, `up`, `down`, `left`, `right` and `plus`. A trailing `+` is the plus key itself, so `mod++` means ⌘+.
+
+Modifiers must match exactly. With `mod+k`, pressing ⌘⇧K does nothing, so a palette shortcut never swallows another shortcut that shares its letter.
+
+The footer prints whatever `hotkey` is set to, in the platform's style (⇧⌘P on a Mac, Ctrl+Shift+P elsewhere). Pass `:hotkey="false"` to turn the shortcut off.
+
+### Option and Alt shortcuts on a Mac
+
+On a Mac, holding ⌥ changes the character a key types: ⌥K types `˚`, and ⌥E starts an accent. So when a shortcut includes `alt` and its key is a letter or a digit, the palette also accepts the physical key. `alt+k` works on a Mac the same way it does on Windows.
+
+Shortcuts without `alt` go by the character instead. That keeps them right on other keyboard layouts: on Dvorak, `mod+k` is the key printed K, wherever it sits.
+
+## Open with slash
+
+`open-on-slash` adds <kbd>/</kbd> as a second way in, as on GitHub and many docs sites. It only fires when focus isn't in a text field, so typing a `/` into an input still types a `/`.
+
+```vue
+<CommandPaletteDialog v-model:open="open" :commands="commands" open-on-slash />
+```
+
+## Several shortcuts
+
+`hotkey` takes one shortcut. For more, turn it off and listen yourself, using the same helpers the dialog uses:
+
+```ts
+import { matchesChord, parseChord, useHotkey } from '@jantursky/vue-cmdk'
+
+const chords = ['mod+k', 'mod+shift+p', 'f1'].map((chord) => parseChord(chord))
+
+useHotkey((event) => {
+  if (chords.some((chord) => matchesChord(chord, event))) {
+    event.preventDefault()
+    open.value = !open.value
+  }
+})
+```
+
+```vue
+<CommandPaletteDialog v-model:open="open" :commands="commands" :hotkey="false" chord="mod+k" />
+```
+
+`chord` sets what the footer prints. Without it, a palette with `:hotkey="false"` prints no shortcut.
+
+`useHotkey` listens on `document` in the capture phase and removes the listener when the component unmounts. The same pattern works for any rule of your own, such as opening only on certain routes.
+
+## From your own code
+
+`v-model:open` is the source of truth. Set it to `true` from a button, a menu item, or anything else:
+
+```vue
+<button type="button" @click="open = true">Search…</button>
+<CommandPaletteDialog v-model:open="open" :commands="commands" />
+```
+
+Without a `v-model`, reach the dialog through a template ref. It exposes `show()`, `hide()`, `toggle()` and `focus()`:
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+import { CommandPaletteDialog } from '@jantursky/vue-cmdk'
+
+const palette = useTemplateRef<InstanceType<typeof CommandPaletteDialog>>('palette')
+</script>
+
+<template>
+  <button type="button" @click="palette?.show()">Search…</button>
+  <CommandPaletteDialog ref="palette" :commands="commands" />
+</template>
+```
+
+Keep a visible button either way. Many people never try a shortcut nobody told them about.

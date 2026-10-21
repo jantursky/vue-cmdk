@@ -1,0 +1,84 @@
+---
+title: Components
+description: Props, events, slots and labels for CommandPalette and CommandPaletteDialog.
+---
+
+`<CommandPalette>` renders the palette inline. `<CommandPaletteDialog>` accepts the same props and adds modal behavior on top.
+
+## Props
+
+| prop            | default           |                                                            |
+| --------------- | ----------------- | ---------------------------------------------------------- |
+| `commands`      | required          | The root list. See [Commands](/guides/commands).           |
+| `scopes`        | `[]`              | See [Scopes](/guides/scopes).                              |
+| `group-order`   | declaration order | Heading order for an empty query.                          |
+| `max-results`   | `40`              | The total number of rows drawn for a non-empty query.      |
+| `filter`        | built-in          | See [Search](/guides/search#a-custom-matcher).             |
+| `recents`       | `true`            | `false`, `true`, or `RecentsOptions`.                      |
+| `quick-select`  | `true`            | ⌘/Ctrl+1-9.                                                |
+| `show-detail`   | `false`           | The band below the list that describes the selected row.   |
+| `labels`        | English           | Every built-in string. Pass any subset of `PaletteLabels`. |
+| `navigate`      | `location.href`   | A router hook for `link` commands.                         |
+| `chord`         | dialog: `hotkey`  | The chord printed in the footer. `false` hides it.         |
+| `autofocus`     | `true`            | Focus the field on mount.                                  |
+| `v-model:query` | `''`              | The text in the field.                                     |
+
+### Dialog only
+
+| prop            | default   |                                                     |
+| --------------- | --------- | --------------------------------------------------- |
+| `v-model:open`  | `false`   | Whether the dialog is open.                         |
+| `hotkey`        | `'mod+k'` | `false` disables the global chord.                  |
+| `open-on-slash` | `false`   | `/` opens the palette when focus is not in a field. |
+| `dismissible`   | `true`    | A backdrop click closes the palette.                |
+| `to`            | `'body'`  | The Teleport target, a selector or an element.      |
+| `trap-focus`    | `true`    | Keep Tab inside the dialog while it's open.         |
+
+## Events
+
+| event          | payload          | when                                                     |
+| -------------- | ---------------- | -------------------------------------------------------- |
+| `select`       | `command, mode`  | An action or link was activated.                         |
+| `error`        | `error, command` | `perform` or a page loader threw or rejected.            |
+| `close`        |                  | Inline only: the palette asked to close (Escape, a run). |
+| `update:open`  | `boolean`        | Dialog only: the dialog opened or closed itself.         |
+| `update:query` | `string`         | The query changed.                                       |
+
+`mode` is `'primary'` or `'alternate'`.
+
+## Exposed methods
+
+Reach these through a template ref.
+
+| component              | exposes                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| `CommandPalette`       | `focus()`, `reset()`, `back()`, `move(step)`, `activate(row)`, and `palette`, the full composable return. |
+| `CommandPaletteDialog` | `show()`, `hide()`, `toggle()`, `focus()`.                                                                |
+
+## Slots
+
+See [Custom rows and slots](/guides/custom-rows#slots).
+
+## Labels
+
+| key           | default                                                       |
+| ------------- | ------------------------------------------------------------- |
+| `placeholder` | `Search commands…`                                            |
+| `empty`       | `Nothing matches`                                             |
+| `emptyHint`   | `Try a different word, or part of a description.`             |
+| `loading`     | `Loading…`                                                    |
+| `recent`      | `Recent`                                                      |
+| `all`         | `All`                                                         |
+| `dialog`      | `Command palette`                                             |
+| `list`        | `Commands`                                                    |
+| `move`        | `move`                                                        |
+| `open`        | `open`                                                        |
+| `run`         | `run`                                                         |
+| `back`        | `back`                                                        |
+| `toggle`      | `open / close`                                                |
+| `scope`       | `scope`                                                       |
+| `clear`       | `Clear the search`                                            |
+| `noSelection` | `Nothing is selected. Keep typing, or press Escape to close.` |
+| `results`     | `{count} results`                                             |
+| `resultsOne`  | `{count} result`                                              |
+| `capped`      | `first {shown} of {matched}`                                  |

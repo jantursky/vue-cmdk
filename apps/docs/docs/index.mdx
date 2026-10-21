@@ -1,0 +1,41 @@
+---
+title: Introduction
+description: A small command palette for Vue 3 that works well from the keyboard and with screen readers.
+---
+
+vue-cmdk gives a Vue 3 app the ⌘K menu people know from editors and dashboards: one field, a filtered list, and every action reachable without the mouse.
+
+The current version is {{version}}. See the [changelog](/changelog) for what each release changed.
+
+<Component path="MinimalExample" />
+
+<Frame caption="The demo app's palette, with scope chips, grouped rows and the detail panel.">
+  <img src="/screenshots/palette-dark.jpg" alt="The palette in the dark theme" />
+</Frame>
+
+There are two ways to use it. `<CommandPaletteDialog>` is a ready-made modal with the hotkey, focus handling and scroll lock already wired. If you'd rather write your own markup, the headless `useCommandPalette()` composable gives you the state and the ARIA attributes and leaves the rendering to you.
+
+What's in it:
+
+- No runtime dependencies. Vue `^3.5` is a peer dependency, and the bundle is about 10 kB minified and gzipped.
+- Plain substring search over labels, keywords and hints, with typographic quotes and dashes folded to their keyboard forms.
+- Nested pages, loaded synchronously or from a promise.
+- Scope chips with optional prefixes such as `>` for commands.
+- Recents ranked by frequency and recency, stored in `localStorage` or through your own adapter.
+- The WAI-ARIA combobox and listbox pattern, with a live region that announces the result count.
+- Unstyled unless you import the theme, which is built on `--cmdk-*` CSS variables with light and dark modes.
+
+<CardGroup cols={2}>
+  <Card title="Getting started" href="/getting-started" icon="rocket">
+    Install the package and render your first palette.
+  </Card>
+  <Card title="Examples" href="/examples" icon="play">
+    Minimal, compact and full palettes, plus two custom themes, with their source.
+  </Card>
+  <Card title="Styling" href="/guides/styling" icon="palette">
+    Theme variables, data attributes, and going fully custom.
+  </Card>
+  <Card title="Reference" href="/reference/components" icon="book-open">
+    Every prop, event, slot and composable option.
+  </Card>
+</CardGroup>

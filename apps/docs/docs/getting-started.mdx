@@ -1,0 +1,88 @@
+---
+title: Getting started
+description: Install vue-cmdk, import the optional theme, and render a palette.
+sidebar:
+  order: 2
+---
+
+## Install
+
+```package-install
+vue-cmdk
+```
+
+vue-cmdk needs Vue `^3.5`.
+
+### Browser support
+
+| browser            | components and composable | default theme |
+| ------------------ | ------------------------- | ------------- |
+| Chrome, Edge       | 93+                       | 111+          |
+| Firefox            | 92+                       | 113+          |
+| Safari, iOS Safari | 15.4+                     | 16.2+         |
+
+The theme's higher floor comes from `color-mix()`, which tints the selected row and its icon. Older browsers still get a working, readable theme, with a plain highlight in place of the tint. Every change is tested in current Chromium, Firefox and WebKit.
+
+## Import the theme
+
+The components ship without styles. To use the default theme, import it once, usually in `main.ts`:
+
+```ts main.ts
+import { createApp } from 'vue'
+import '@jantursky/vue-cmdk/style.css'
+
+import App from './App.vue'
+
+createApp(App).mount('#app')
+```
+
+Leave this import out if you plan to write all the CSS yourself. [Styling](/guides/styling) covers both routes.
+
+## Render a palette
+
+```vue App.vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { CommandPaletteDialog, type Command } from '@jantursky/vue-cmdk'
+
+const open = ref(false)
+
+// With vue-router: const navigate = (href: string) => router.push(href)
+const navigate = (href: string) => {
+  location.hash = href
+}
+
+const commands: Command[] = [
+  { kind: 'link', id: 'home', label: 'Home', href: '/', group: 'Pages', alternateLabel: 'Open in new tab' },
+  {
+    kind: 'action',
+    id: 'copy-url',
+    label: 'Copy current URL',
+    group: 'Actions',
+    keywords: ['clipboard', 'share'],
+    perform: () => navigator.clipboard.writeText(location.href),
+  },
+]
+</script>
+
+<template>
+  <button @click="open = true">Search…</button>
+  <CommandPaletteDialog v-model:open="open" :commands="commands" :navigate="navigate" />
+</template>
+```
+
+Press <kbd>⌘</kbd> <kbd>K</kbd> (or <kbd>Ctrl</kbd> <kbd>K</kbd> on Windows and Linux) anywhere on the page to open it. The button is optional, but it helps people who don't know the shortcut.
+
+## Inline instead of a dialog
+
+`<CommandPalette>` takes the same props and renders in place, without the overlay, the hotkey or the focus trap. Use it for a sidebar, a settings page, or anywhere the list should stay on screen. Pressing Escape on an empty field emits `close`, so you can decide what that means.
+
+```vue
+<CommandPalette :commands="commands" :autofocus="false" @select="onSelect" />
+```
+
+## Next steps
+
+- [Commands](/guides/commands) lists every field a command can have.
+- [Examples](/examples) shows finished palettes with their source.
+- [Headless](/guides/headless) is the route to take if your design system already has list and input components.

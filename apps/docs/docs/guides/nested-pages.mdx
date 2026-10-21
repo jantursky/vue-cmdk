@@ -1,0 +1,45 @@
+---
+title: Nested pages
+description: Commands that open a second list, loaded up front or on demand.
+---
+
+A `page` command opens a child list in place of the current one. A breadcrumb appears above the field, and Backspace on an empty field or Escape goes back.
+
+```ts
+const language: Command = {
+  kind: 'page',
+  id: 'language',
+  label: 'Change language…',
+  placeholder: 'Pick a language',
+  children: [
+    { kind: 'action', id: 'lang-en', label: 'English', perform: () => setLanguage('en') },
+    { kind: 'action', id: 'lang-de', label: 'Deutsch', perform: () => setLanguage('de') },
+  ],
+}
+```
+
+## Loading children
+
+`children` can also be a function that returns the list, sync or async. It runs each time the page opens, and the palette shows a loading row until the promise settles.
+
+```ts
+const releases: Command = {
+  kind: 'page',
+  id: 'releases',
+  label: 'Releases…',
+  children: async () => {
+    const list = await api.get('/releases')
+    return list.map((release) => ({ kind: 'link', id: release.tag, label: release.name, href: release.url }))
+  },
+}
+```
+
+If the loader rejects, the page doesn't open, the palette stays on the current list, and it emits `error`. If the person leaves the page before the promise settles, the late result is dropped.
+
+## Pages and recents
+
+Opening a page isn't recorded as a recent, but the commands inside it are. A recent from a page with an array of `children` can be pinned on the root list, because the palette can find it there. Commands behind a loader function can't be found without calling it, so they aren't pinned.
+
+## Scopes on pages
+
+Scope chips only show on the root list. A child page is already a narrowed list, so it searches everything inside it.

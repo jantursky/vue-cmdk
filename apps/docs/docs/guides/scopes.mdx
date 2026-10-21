@@ -1,0 +1,31 @@
+---
+title: Scopes
+description: Chips that narrow the list to one kind of command, with optional typed prefixes.
+---
+
+Scopes split a long list into kinds, such as pages, commands and people. Each scope becomes a chip above the list, next to an "All" chip.
+
+```ts
+import type { Scope } from '@jantursky/vue-cmdk'
+
+const scopes: Scope[] = [
+  { id: 'pages', label: 'Pages' },
+  { id: 'run', label: 'Run', prefix: '>' },
+]
+```
+
+```vue
+<CommandPaletteDialog :commands="commands" :scopes="scopes" />
+```
+
+A command joins a scope through its `scope` field. Commands without one only show under "All".
+
+## Choosing a scope
+
+- Click a chip. If the query starts with a prefix, the prefix is removed so the chip you picked wins.
+- Press <kbd>Tab</kbd> and <kbd>Shift</kbd> <kbd>Tab</kbd> to cycle through the chips while the field has focus.
+- Type a scope's `prefix` at the start of the query. `>copy` searches only the Run scope for "copy". Delete the prefix and the palette goes back to the chip that was chosen before.
+
+Each chip shows how many results the current query has in that scope, so people can see where the matches are before switching.
+
+Scope chips only appear on the root list. On a [nested page](/guides/nested-pages) the list is already narrow.
