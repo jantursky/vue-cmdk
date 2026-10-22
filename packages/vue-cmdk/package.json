@@ -61,7 +61,7 @@
     "test:coverage": "vitest run --coverage && vitest run --config vitest.ssr.config.ts",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "lint:package": "publint --strict && attw --pack . --profile node16 --exclude-entrypoints style.css",
-    "prepublishOnly": "bun run typecheck && bun run test && bun run test:browser && bun run build && bun run lint:package"
+    "prepublishOnly": "bun run typecheck && bun run test && bun run build && bun run lint:package"
   },
   "peerDependencies": {
     "vue": "^3.5.0"

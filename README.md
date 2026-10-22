@@ -50,7 +50,7 @@ bun run lint:fix       # fix what ESLint can fix
 
 CI (`.github/workflows/ci.yml`) runs `check`, `build`, `lint:package` and `build:docs` on pushes to `main` and on pull requests. It uploads the coverage report to Codecov, and runs the unit tests again on Vue 3.5.0 and the latest Vue, the two ends of the peer range.
 
-`bun run test` also renders every entry point on a server with no DOM (`test/ssr.test.ts`, with its own `vitest.ssr.config.ts` so the SSR build stays out of the coverage numbers). The browser suite runs [axe-core](https://github.com/dequelabs/axe-core) over the palette in both themes (`test/browser/a11y.test.ts`). CI skips it to avoid downloading the browsers, so run `bun run test:browser` locally before a release; `prepublishOnly` runs it too.
+`bun run test` also renders every entry point on a server with no DOM (`test/ssr.test.ts`, with its own `vitest.ssr.config.ts` so the SSR build stays out of the coverage numbers). The browser suite runs [axe-core](https://github.com/dequelabs/axe-core) over the palette in both themes (`test/browser/a11y.test.ts`). Neither CI nor the release workflow runs it, to avoid downloading the browsers, so run `bun run test:browser` locally before a release.
 
 The browser tests need Playwright's engines once per machine: `bunx playwright install chromium firefox webkit`.
 
@@ -66,7 +66,7 @@ The browser tests need Playwright's engines once per machine: `bunx playwright i
    git push origin v1.1.0
    ```
 
-The `Release` workflow (`.github/workflows/release.yml`) then checks that the tag matches `package.json`, publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), and creates the GitHub release from the changelog section. `prepublishOnly` runs the typecheck, both test suites, the build and the package checks first, and stops the publish if any fail.
+The `Release` workflow (`.github/workflows/release.yml`) then checks that the tag matches `package.json`, publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), and creates the GitHub release from the changelog section. `prepublishOnly` runs the typecheck, the unit and SSR tests, the build and the package checks first, and stops the publish if any fail.
 
 One-time setup, before the first tagged release:
 

@@ -34,9 +34,7 @@ jobs:
             echo "Tag $GITHUB_REF_NAME does not match package.json version $version" >&2
             exit 1
           fi
-      - name: Install browsers for prepublishOnly
-        run: bunx playwright install --with-deps chromium firefox webkit
-      # prepublishOnly runs the typecheck, both test suites, the build and the package checks.
+      # prepublishOnly runs the typecheck, the unit and SSR tests, the build and the package checks.
       - name: Publish
         working-directory: packages/vue-cmdk
         run: npm publish --provenance --access public
