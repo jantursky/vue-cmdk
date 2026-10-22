@@ -101,14 +101,15 @@ Errors thrown or rejected by `perform` or by `children` are caught and emitted a
 
 ## Search
 
-The query matches as a plain substring anywhere in the label, keywords, or hint. There's no fuzzy matching, on purpose: fuzzy search returns something for every query, so a typo gets you a confident list of wrong answers. Ranking, best first:
+The query matches as a plain substring anywhere in the label, keywords, or hint, ignoring case and accents. A query with several words matches when every word appears somewhere, in any order, so `file new` finds `New file`. There's no fuzzy matching, on purpose: fuzzy search returns something for every query, so a typo gets you a confident list of wrong answers. Ranking, best first:
 
 1. the label starts with the query
 2. the label contains it (earlier positions rank higher)
-3. a keyword contains it
-4. the hint contains it (earlier positions rank higher)
+3. the label contains every word, but not as one run
+4. a keyword contains the query, or the label and keywords contain every word between them
+5. the hint is needed for the query or one of its words (earlier positions rank higher)
 
-Typographic quotes and dashes match their keyboard equivalents, so typing `what's` finds `What’s new`. Matched text is wrapped in `<mark data-cmdk-highlight>`. Groups are sorted by their best match, except for an empty query, where they follow the `groupOrder` prop.
+Accented letters match their plain forms, so `resume` finds `Résumé`, and typographic quotes and dashes match their keyboard equivalents, so typing `what's` finds `What’s new`. Matched text, every query word of it, is wrapped in `<mark data-cmdk-highlight>`. Groups are sorted by their best match, except for an empty query, where they follow the `groupOrder` prop.
 
 If you want a different matcher, pass a `filter`. It returns `null` for no match, or a score where lower is better:
 

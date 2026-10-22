@@ -148,3 +148,23 @@ describe('recents in buildList', () => {
     ).toBe(false)
   })
 })
+
+describe('list size', () => {
+  it('builds a list over 2,000 commands for a three-word query within a keystroke budget', () => {
+    const words = ['open', 'close', 'toggle', 'export', 'résumé', 'café', 'report', 'table', 'panel', 'settings']
+    const commands: Command[] = Array.from({ length: 2000 }, (_, index) =>
+      action(`c${index}`, `${words[index % 10]} ${words[(index * 7) % 10]} item ${index}`, {
+        group: `Group ${index % 12}`,
+        keywords: [words[(index * 3) % 10] ?? '', `kw${index}`],
+        hint: `Does ${words[(index * 5) % 10]} with the ${words[(index * 9) % 10]} of item ${index}`,
+      }),
+    )
+
+    const started = performance.now()
+    const list = buildList({ commands, query: 'panel resume toggle' })
+    const elapsed = performance.now() - started
+
+    expect(list.matched).toBeGreaterThan(0)
+    expect(elapsed).toBeLessThan(50)
+  })
+})

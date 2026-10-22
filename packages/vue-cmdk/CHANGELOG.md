@@ -2,6 +2,23 @@
 
 All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Search ignores accents: `resume` finds `Résumé`, and `café` finds `Cafe`. The highlight marks the label as written. Labels stored in decomposed form, such as macOS file names, match too.
+- A query with several words matches when every word appears in the label, keywords or hint, in any order, so `file new` finds `New file`. The query typed as one run still ranks first, and every matched word is highlighted.
+- The build prints the size of an app that imports only `CommandPaletteDialog`, next to the size of the whole entry.
+
+### Changed
+
+- The size budget for the main entry is now 14 kB minified and gzipped, up from 12 kB, to leave room for the next features.
+- `matchQuery` marks every query word it finds, and `rankMatch` ranks multi-word queries. Single-word results are unchanged.
+
+### Fixed
+
+- Highlights after a letter whose lower case is longer, such as `İ`, no longer mark the wrong characters.
+
 ## [1.0.1] - 2026-10-22
 
 ### Fixed

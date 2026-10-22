@@ -100,6 +100,7 @@ export const commands: Command[] = [
     'changelog',
     'releases',
   ]),
+  page('resume', 'Résumé templates', '#/resume', IconBook, 'Accents are optional: type “resume” to find it.', ['cv']),
   {
     kind: 'link',
     id: 'page:billing',

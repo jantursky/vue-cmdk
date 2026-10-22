@@ -3,7 +3,9 @@ title: Search
 description: How the query matches and ranks rows, and how to swap in your own matcher.
 ---
 
-The query matches as a plain substring anywhere in the label, keywords, or hint. Case doesn't matter. There's no fuzzy matching, on purpose: fuzzy search returns something for every query, so a typo gets you a confident list of wrong answers.
+The query matches as a plain substring anywhere in the label, keywords, or hint. Case and accents don't matter. There's no fuzzy matching, on purpose: fuzzy search returns something for every query, so a typo gets you a confident list of wrong answers.
+
+A query with several words matches when every word appears somewhere in the label, keywords or hint, in any order. `file new` finds `New file`, and `copy clip` finds `Copy URL` when one of its keywords is `clipboard`. Each word still has to appear as typed: `new folder` doesn't find `New file`.
 
 ## Ranking
 
@@ -11,20 +13,25 @@ Best first:
 
 1. the label starts with the query
 2. the label contains it (earlier positions rank higher)
-3. a keyword contains it
-4. the hint contains it (earlier positions rank higher)
+3. the label contains every word of the query, but not as one run
+4. a keyword contains the query, or the label and keywords contain every word between them
+5. the hint is needed to find the query or one of its words (earlier positions rank higher)
+
+So a query typed as it appears in the label always beats the same words found scattered.
 
 Groups are sorted by their best match, so the group holding the top hit comes first. With an empty query there is nothing to rank, and groups follow the `group-order` prop, or the order they first appear in `commands`.
 
 A non-empty query draws at most 40 rows. Change that with `max-results`. The footer shows "first 40 of 112" when the list was capped.
 
-## Typographic marks
+## Accents and typographic marks
+
+Accented letters match their plain forms in both directions, so `resume` finds `Résumé`, and `café` finds `Cafe`. The highlight marks the label as written, accents included. Letters that aren't an accented form of another letter, such as the `æ` in `Encyclopædia`, only match themselves.
 
 Curly quotes, dashes and similar characters match their keyboard forms, so typing `what's` finds `What’s new`, and `light - dark` finds `Light — dark`.
 
 ## Highlighting
 
-Matched text is wrapped in `<mark data-cmdk-highlight>`. Keywords only show when they matched, as small chips after the label, at most three per row.
+Matched text is wrapped in `<mark data-cmdk-highlight>`. With several words, each one is marked where it first appears. Keywords only show when they matched, as small chips after the label, at most three per row.
 
 If you render rows yourself, the `CommandHighlight` component draws the same marks from a row's segments:
 

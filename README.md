@@ -46,7 +46,7 @@ bun run format         # format everything with Prettier
 bun run lint:fix       # fix what ESLint can fix
 ```
 
-`bun run build` fails if the library grows past 12 kB minified and gzipped. Coverage has minimum thresholds, so `bun run check` fails if they drop.
+`bun run build` fails if the library's main entry grows past 14 kB minified and gzipped. It also prints what an app that imports only `CommandPaletteDialog` ships, to catch growth in the common case. Coverage has minimum thresholds, so `bun run check` fails if they drop.
 
 CI (`.github/workflows/ci.yml`) runs `check`, `build`, `lint:package` and `build:docs` on pushes to `main` and on pull requests. It uploads the coverage report to Codecov, and runs the unit tests again on Vue 3.5.0 and the latest Vue, the two ends of the peer range.
 
