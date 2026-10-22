@@ -22,7 +22,7 @@ const copy = async (): Promise<void> => {
 </script>
 
 <template>
-  <section :id="id" class="demo example">
+  <section :id="id" class="example">
     <header>
       <h3>{{ title }}</h3>
       <slot name="description" />

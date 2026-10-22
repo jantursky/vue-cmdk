@@ -32,6 +32,21 @@ const onError = (error: unknown, command: Command): void => {
   logAction(`${command.label} failed: ${error instanceof Error ? error.message : String(error)}`)
 }
 
+const INSTALL = 'bun add vue-cmdk-palette'
+const copied = ref(false)
+const copyInstall = async (): Promise<void> => {
+  await navigator.clipboard.writeText(INSTALL)
+  copied.value = true
+  setTimeout(() => (copied.value = false), 1500)
+}
+
+const FACTS: [string, string][] = [
+  ['~10 kB', 'minified and gzipped'],
+  ['0', 'runtime dependencies'],
+  ['WAI-ARIA', 'combobox and listbox'],
+  ['Vue ^3.5', 'peer dependency'],
+]
+
 const themes: { value: ThemeChoice; label: string }[] = [
   { value: 'system', label: 'System' },
   { value: 'light', label: 'Light' },
@@ -56,50 +71,62 @@ const KEYS: [string, string][] = [
   <div class="page" :class="{ wireframe: app.wireframe }">
     <div v-if="app.rulers" class="ruler" aria-hidden="true" />
 
-    <header class="hero">
-      <p class="eyebrow">
+    <nav class="topbar" aria-label="Site">
+      <a class="brand" href="#">
         <img class="mark" src="/favicon.svg" alt="" width="20" height="20" />
-        vue-cmdk <span class="version">v{{ version }}</span>
-      </p>
-      <h1>A command palette for Vue 3</h1>
+        vue-cmdk
+        <span class="version">v{{ version }}</span>
+      </a>
+      <div class="topbar-links">
+        <a href="#examples-title">Examples</a>
+        <a href="https://vue-cmdk-docs.vercel.app">Docs</a>
+        <a href="https://github.com/jantursky/vue-cmdk">GitHub</a>
+        <a href="https://www.npmjs.com/package/vue-cmdk-palette">npm</a>
+      </div>
+      <div class="segmented" role="radiogroup" aria-label="Theme">
+        <button
+          v-for="theme in themes"
+          :key="theme.value"
+          type="button"
+          role="radio"
+          :aria-checked="app.theme === theme.value"
+          @click="app.theme = theme.value"
+        >
+          {{ theme.label }}
+        </button>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <p class="eyebrow">A command palette for Vue 3</p>
+      <h1>Every action, one <span class="accent">keystroke</span> away.</h1>
       <p class="lead">
         Accessible, keyboard-first and about 10 kB. A headless composable, a ready-made dialog, and an optional theme.
       </p>
       <div class="hero-actions">
-        <button type="button" class="trigger" @click="open = true">
-          <svg
-            viewBox="0 0 24 24"
-            width="16"
-            height="16"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            aria-hidden="true"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-          </svg>
+        <button type="button" class="button button-solid" @click="open = true">
           Search commands
           <kbd>{{ chord }}</kbd>
         </button>
-        <div class="segmented" role="radiogroup" aria-label="Theme">
-          <button
-            v-for="theme in themes"
-            :key="theme.value"
-            type="button"
-            role="radio"
-            :aria-checked="app.theme === theme.value"
-            @click="app.theme = theme.value"
-          >
-            {{ theme.label }}
-          </button>
-        </div>
+        <a class="button" href="https://vue-cmdk-docs.vercel.app">Read the docs</a>
       </div>
-      <code class="install">bun add vue-cmdk-palette</code>
+      <div class="install">
+        <code><span aria-hidden="true">$ </span>{{ INSTALL }}</code>
+        <button type="button" @click="copyInstall">{{ copied ? 'Copied' : 'Copy' }}</button>
+      </div>
     </header>
 
-    <main class="grid">
-      <section class="card">
+    <InlineDemo />
+
+    <ul class="facts" aria-label="At a glance">
+      <li v-for="[value, what] in FACTS" :key="value">
+        <strong>{{ value }}</strong>
+        <span>{{ what }}</span>
+      </li>
+    </ul>
+
+    <main class="bento">
+      <section class="card card-dark">
         <h2>Try it</h2>
         <dl class="keys">
           <template v-for="[keys, what] in KEYS" :key="keys">
@@ -134,19 +161,20 @@ const KEYS: [string, string][] = [
         </ol>
         <p v-else class="note">Nothing yet. Open the palette and pick something.</p>
       </section>
-    </main>
 
-    <div class="demos">
-      <InlineDemo />
       <CustomItemDemo />
       <HeadlessDemo />
-    </div>
+    </main>
 
     <ExamplesSection />
 
     <footer class="footer">
-      <a href="https://vue-cmdk-docs.vercel.app">Docs</a> · <a href="https://github.com/jantursky/vue-cmdk">GitHub</a> ·
-      <a href="https://www.npmjs.com/package/vue-cmdk-palette">npm</a> · MIT licensed.
+      <span>vue-cmdk · MIT licensed</span>
+      <nav aria-label="Footer">
+        <a href="https://vue-cmdk-docs.vercel.app">Docs</a>
+        <a href="https://github.com/jantursky/vue-cmdk">GitHub</a>
+        <a href="https://www.npmjs.com/package/vue-cmdk-palette">npm</a>
+      </nav>
     </footer>
 
     <CommandPaletteDialog

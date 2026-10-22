@@ -23,7 +23,8 @@ createApp(App).mount('#app')`
 <template>
   <section class="examples" aria-labelledby="examples-title">
     <header class="examples-head">
-      <h2 id="examples-title">Examples</h2>
+      <p class="eyebrow">Examples</p>
+      <h2 id="examples-title" class="section-title">Five palettes, <span class="accent">one</span> library.</h2>
       <p>
         Each example is one self-contained component. Open <em>View source</em> to read the exact file that runs on this
         page.

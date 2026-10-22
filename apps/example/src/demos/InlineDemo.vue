@@ -9,13 +9,10 @@ const query = ref('')
 </script>
 
 <template>
-  <section class="demo">
-    <header>
-      <h2>Inline</h2>
-      <p>
-        The same palette embedded in the page: no dialog, no backdrop, no global chord. Escape on an empty field emits
-        <code>close</code>.
-      </p>
+  <section class="frame" aria-labelledby="inline-title">
+    <header class="frame-bar">
+      <h2 id="inline-title">&lt;CommandPalette&gt; inline</h2>
+      <p>No dialog, no backdrop, no global chord. Escape on an empty field emits <code>close</code>.</p>
     </header>
     <div class="inline-frame">
       <CommandPalette
