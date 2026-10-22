@@ -14,7 +14,7 @@
     "vue-cmdk-palette": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22",
+    "@types/node": "^26",
     "@vitejs/plugin-vue": "^6",
     "typescript": "~5.9.3",
     "vite": "^8",
