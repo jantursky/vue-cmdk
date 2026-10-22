@@ -30,7 +30,14 @@ jobs:
         run: bun run typecheck
       - name: Test with coverage
         run: bun run test:coverage
-      - name: Test in real browsers
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: packages/vue-cmdk/coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          # A Codecov outage should not turn the build red; the thresholds in vitest.config.ts still apply.
+          fail_ci_if_error: false
+      - name: Test in real browsers (behavior and axe)
         run: |
           bunx playwright install --with-deps chromium firefox webkit
           bun run test:browser
@@ -40,3 +47,28 @@ jobs:
         run: bun run lint:package
       - name: Build docs
         run: bun run build:docs
+
+  # The peer range is `vue: ^3.5.0`. Run the unit and SSR tests on its lowest and newest versions.
+  vue-versions:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        vue: ['3.5.0', 'latest']
+    name: vue ${{ matrix.vue }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Pin Vue
+        run: npm pkg set overrides.vue=${{ matrix.vue }}
+      - run: bun install
+      - name: Installed version
+        run: |
+          node -p "'vue ' + require(require.resolve('vue/package.json', { paths: ['packages/vue-cmdk'] })).version"
+      - name: Test
+        run: bun run test

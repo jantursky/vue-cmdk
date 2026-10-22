@@ -2,6 +2,12 @@
 
 # vue-cmdk
 
+[![CI](https://github.com/jantursky/vue-cmdk/actions/workflows/ci.yml/badge.svg)](https://github.com/jantursky/vue-cmdk/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/jantursky/vue-cmdk/graph/badge.svg)](https://codecov.io/gh/jantursky/vue-cmdk)
+[![npm](https://img.shields.io/npm/v/vue-cmdk-palette)](https://www.npmjs.com/package/vue-cmdk-palette)
+[![Bundle size](https://img.shields.io/bundlephobia/minzip/vue-cmdk-palette)](https://bundlephobia.com/package/vue-cmdk-palette)
+[![License](https://img.shields.io/npm/l/vue-cmdk-palette)](https://github.com/jantursky/vue-cmdk/blob/main/LICENSE)
+
 [Docs](https://vue-cmdk-docs.vercel.app) · [Demo](https://vue-cmdk.vercel.app) · [Changelog](https://github.com/jantursky/vue-cmdk/blob/main/packages/vue-cmdk/CHANGELOG.md) · [GitHub](https://github.com/jantursky/vue-cmdk)
 
 ![The palette in the dark theme, with scope chips, grouped rows and the detail panel](https://raw.githubusercontent.com/jantursky/vue-cmdk/main/apps/docs/public/screenshots/palette-dark.jpg)

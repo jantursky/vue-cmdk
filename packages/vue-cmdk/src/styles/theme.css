@@ -19,10 +19,10 @@
   --cmdk-bg-hover: #f1f3f6;
   --cmdk-fg: #15171c;
   --cmdk-fg-muted: #5b6270;
-  --cmdk-fg-faint: #8b93a1;
+  --cmdk-fg-faint: #656d7b;
   --cmdk-border: #e4e7ec;
   --cmdk-border-strong: #d3d8e0;
-  --cmdk-accent: #0f8a7e;
+  --cmdk-accent: #0a7369;
   --cmdk-accent-fg: #ffffff;
   --cmdk-highlight: currentColor;
   --cmdk-badge-bg: #fff3d6;
@@ -38,7 +38,7 @@
     --cmdk-bg-hover: #20232a;
     --cmdk-fg: #eceef2;
     --cmdk-fg-muted: #a6adba;
-    --cmdk-fg-faint: #757d8b;
+    --cmdk-fg-faint: #868e9c;
     --cmdk-border: #262a32;
     --cmdk-border-strong: #343944;
     --cmdk-accent: #3fc1b0;
@@ -56,7 +56,7 @@
   --cmdk-bg-hover: #20232a;
   --cmdk-fg: #eceef2;
   --cmdk-fg-muted: #a6adba;
-  --cmdk-fg-faint: #757d8b;
+  --cmdk-fg-faint: #868e9c;
   --cmdk-border: #262a32;
   --cmdk-border-strong: #343944;
   --cmdk-accent: #3fc1b0;

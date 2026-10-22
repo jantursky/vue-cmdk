@@ -247,8 +247,10 @@ describe('development warnings', () => {
   it('warns once per duplicated id and still renders both rows', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const wrapper = render({ commands: [action('dup', 'One'), action('dup', 'Two')] })
-    expect(warn).toHaveBeenCalledTimes(1)
-    expect(warn.mock.calls[0]?.[0]).toContain('"dup"')
+    // Count only our own warnings: Vue 3.5.0 adds a readonly-ref warning of its own on duplicate keys.
+    const ours = warn.mock.calls.filter(([message]) => String(message).startsWith('[vue-cmdk]'))
+    expect(ours).toHaveLength(1)
+    expect(ours[0]?.[0]).toContain('"dup"')
     expect(wrapper.findAll('[data-cmdk-item]')).toHaveLength(2)
   })
 })

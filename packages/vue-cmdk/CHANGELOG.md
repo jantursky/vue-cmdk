@@ -4,6 +4,10 @@ All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- The default theme now meets the WCAG AA contrast ratio of 4.5:1. The faint text (the result count, the `esc` key, the detail verb) is darker in both modes, and the light accent is a darker teal, `#0a7369`, so white text on it and the active scope chip stay readable.
+
 ## [1.0.0] - 2026-10-21
 
 The first version.
@@ -22,5 +26,5 @@ The first version.
 - Replaceable labels for every built-in string.
 - An optional theme at `vue-cmdk-palette/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
 
-[Unreleased]: https://www.npmjs.com/package/vue-cmdk-palette
+[Unreleased]: https://github.com/jantursky/vue-cmdk/compare/v1.0.0...HEAD
 [1.0.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.0.0

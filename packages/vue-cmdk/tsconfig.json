@@ -10,6 +10,7 @@
     "test/**/*.ts",
     "vite.config.ts",
     "vitest.config.ts",
-    "vitest.browser.config.ts"
+    "vitest.browser.config.ts",
+    "vitest.ssr.config.ts"
   ]
 }

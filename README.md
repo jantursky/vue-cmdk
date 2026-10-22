@@ -2,6 +2,12 @@
 
 # vue-cmdk
 
+[![CI](https://github.com/jantursky/vue-cmdk/actions/workflows/ci.yml/badge.svg)](https://github.com/jantursky/vue-cmdk/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/jantursky/vue-cmdk/graph/badge.svg)](https://codecov.io/gh/jantursky/vue-cmdk)
+[![npm](https://img.shields.io/npm/v/vue-cmdk-palette)](https://www.npmjs.com/package/vue-cmdk-palette)
+[![Bundle size](https://img.shields.io/bundlephobia/minzip/vue-cmdk-palette)](https://bundlephobia.com/package/vue-cmdk-palette)
+[![License](https://img.shields.io/npm/l/vue-cmdk-palette)](LICENSE)
+
 [Docs](https://vue-cmdk-docs.vercel.app) · [Demo](https://vue-cmdk.vercel.app) · [npm](https://www.npmjs.com/package/vue-cmdk-palette) · [Changelog](packages/vue-cmdk/CHANGELOG.md)
 
 A small, accessible command palette for Vue 3. This repository holds the library, a demo app and the docs site.
@@ -42,23 +48,30 @@ bun run lint:fix       # fix what ESLint can fix
 
 `bun run build` fails if the library grows past 12 kB minified and gzipped. Coverage has minimum thresholds, so `bun run check` fails if they drop.
 
-CI (`.github/workflows/ci.yml`) runs `check`, the browser tests, `build`, `lint:package` and `build:docs` on pushes to `main` and on pull requests.
+CI (`.github/workflows/ci.yml`) runs `check`, the browser tests, `build`, `lint:package` and `build:docs` on pushes to `main` and on pull requests. It uploads the coverage report to Codecov, and runs the unit tests again on Vue 3.5.0 and the latest Vue, the two ends of the peer range.
+
+`bun run test` also renders every entry point on a server with no DOM (`test/ssr.test.ts`, with its own `vitest.ssr.config.ts` so the SSR build stays out of the coverage numbers). The browser suite runs [axe-core](https://github.com/dequelabs/axe-core) over the palette in both themes (`test/browser/a11y.test.ts`), so a contrast or ARIA regression fails the build.
 
 The browser tests need Playwright's engines once per machine: `bunx playwright install chromium firefox webkit`.
 
 ## Releasing a new version
 
-1. Move the entries under `## [Unreleased]` in `packages/vue-cmdk/CHANGELOG.md` into a new section, such as `## [1.1.0] - 2026-11-03`, and add its link at the bottom. Leave an empty `## [Unreleased]` section above it.
+1. Add a new section at the top of `packages/vue-cmdk/CHANGELOG.md`, such as `## [1.1.0] - 2026-11-03`, and add its link at the bottom. If changes were collected under `## [Unreleased]`, move them into it and remove that heading, so the docs never show an empty unreleased entry.
 2. Set the same version in `packages/vue-cmdk/package.json`. The demo app and the docs read it from there.
-3. Run `bun run check && bun run build:docs`.
-4. Publish from the package folder. `prepublishOnly` runs the typecheck, both test suites, the build and the package checks first, and stops the publish if any fail:
+3. Run `bun run check && bun run build:docs`, then commit.
+4. Tag the commit and push the tag:
 
    ```sh
-   cd packages/vue-cmdk
-   bun publish --access public
+   git tag v1.1.0
+   git push origin v1.1.0
    ```
 
-5. Tag the release in git (`v1.1.0`) and push the tag.
+The `Release` workflow (`.github/workflows/release.yml`) then checks that the tag matches `package.json`, publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), and creates the GitHub release from the changelog section. `prepublishOnly` runs the typecheck, both test suites, the build and the package checks first, and stops the publish if any fail.
+
+One-time setup, before the first tagged release:
+
+- On npmjs.com, open the package's **Settings → Trusted publishing**, add GitHub Actions with repository `jantursky/vue-cmdk`, workflow `release.yml` and environment `npm`. The workflow needs no npm token after that.
+- For the coverage badge, add the repository on [codecov.io](https://codecov.io) and save its upload token as the `CODECOV_TOKEN` repository secret.
 
 Versions follow semantic versioning: a breaking change needs a new major version, listed under **Changed** in the changelog.
 

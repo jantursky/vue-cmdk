@@ -31,6 +31,9 @@ lib-cov
 coverage
 *.lcov
 
+# Failure screenshots from the Vitest browser tests
+.vitest
+
 # NYC test coverage
 .nyc_output
 

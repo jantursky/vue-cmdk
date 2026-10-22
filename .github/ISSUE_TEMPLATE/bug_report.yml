@@ -1,0 +1,38 @@
+name: Bug report
+description: Something in vue-cmdk does not work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: A link to a StackBlitz or a repository, or the smallest component that shows the problem.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: vue-cmdk-palette version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: vue
+    attributes:
+      label: Vue version
+      placeholder: 3.5.13
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser, OS and screen reader
+      description: Include the screen reader for accessibility problems.
+      placeholder: Safari 18 on macOS 15 with VoiceOver

@@ -1,0 +1,21 @@
+name: Feature request
+description: Suggest something vue-cmdk could do.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you are trying to build, and where vue-cmdk gets in the way.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+      description: The API or behavior you have in mind. A code sample helps.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead
+      description: Slots, the headless composable, or CSS you tried, and why they were not enough.
