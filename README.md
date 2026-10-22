@@ -62,11 +62,11 @@ The browser tests need Playwright's engines once per machine: `bunx playwright i
 4. Tag the commit and push the tag:
 
    ```sh
-   git tag v1.1.0
-   git push origin v1.1.0
+   git tag 1.1.0
+   git push origin 1.1.0
    ```
 
-The `Release` workflow (`.github/workflows/release.yml`) then checks that the tag matches `package.json`, publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), and creates the GitHub release from the changelog section. `prepublishOnly` runs the typecheck, the unit and SSR tests, the build and the package checks first, and stops the publish if any fail.
+The `Release` workflow (`.github/workflows/release.yml`) takes tags with or without a `v`. It checks that the tag matches `package.json`, then runs two independent jobs: one creates the [GitHub release](https://github.com/jantursky/vue-cmdk/releases) with the changelog section as its notes, the other publishes to npm with [provenance](https://docs.npmjs.com/generating-provenance-statements), skipping a version that is already there. To create the release for an older tag, run the workflow by hand from the Actions tab with that tag. `prepublishOnly` runs the typecheck, the unit and SSR tests, the build and the package checks first, and stops the publish if any fail.
 
 One-time setup, before the first tagged release:
 

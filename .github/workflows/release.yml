@@ -1,22 +1,69 @@
 name: Release
 
-# Pushing a tag such as `v1.1.0` publishes that version to npm with provenance,
-# then creates the GitHub release with the matching changelog section.
+# Pushing a version tag, `1.1.0` or `v1.1.0`, creates the GitHub release with the
+# matching changelog section and publishes that version to npm with provenance.
+# The two jobs are independent: a failed publish still leaves the GitHub release.
+# Run it by hand with a tag to create the release for a tag pushed earlier.
 on:
   push:
-    tags: ['v*']
+    tags: ['[0-9]*', 'v[0-9]*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to release, such as 1.0.0
+        required: true
 
-permissions:
-  contents: write
-  # Trusted publishing: npm exchanges this OIDC token for a short-lived publish token.
-  id-token: write
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
 
 jobs:
-  publish:
+  github-release:
     runs-on: ubuntu-latest
-    environment: npm
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.TAG }}
+      - name: Check the tag matches package.json
+        run: |
+          version=$(node -p "require('./packages/vue-cmdk/package.json').version")
+          if [ "${TAG#v}" != "$version" ]; then
+            echo "Tag $TAG does not match package.json version $version" >&2
+            exit 1
+          fi
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG already exists"
+            exit 0
+          fi
+          awk -v v="${TAG#v}" '
+            $0 ~ "^## \\[" v "\\]" { found = 1; next }
+            found && /^## \[/ { exit }
+            found && /^\[.*\]: / { exit }
+            found { print }
+          ' packages/vue-cmdk/CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "CHANGELOG.md has no section for ${TAG#v}" >&2
+            exit 1
+          fi
+          echo "[npm](https://www.npmjs.com/package/vue-cmdk-palette/v/${TAG#v})" >> notes.md
+          gh release create "$TAG" --verify-tag --title "$TAG" --notes-file notes.md
+
+  npm:
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      # Trusted publishing: npm exchanges this OIDC token for a short-lived publish token.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ env.TAG }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
@@ -25,28 +72,24 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-      - run: bun install --frozen-lockfile
-      - name: Check the tag matches package.json
-        working-directory: packages/vue-cmdk
+      - name: Skip a version that is already on npm
+        id: check
         run: |
-          version=$(node -p "require('./package.json').version")
-          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match package.json version $version" >&2
+          version="${TAG#v}"
+          if [ "$version" != "$(node -p "require('./packages/vue-cmdk/package.json').version")" ]; then
+            echo "Tag $TAG does not match package.json" >&2
             exit 1
           fi
+          if npm view "vue-cmdk-palette@$version" version > /dev/null 2>&1; then
+            echo "vue-cmdk-palette@$version is already published"
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.check.outputs.publish == 'true'
+        run: bun install --frozen-lockfile
       # prepublishOnly runs the typecheck, the unit and SSR tests, the build and the package checks.
       - name: Publish
+        if: steps.check.outputs.publish == 'true'
         working-directory: packages/vue-cmdk
         run: npm publish --provenance --access public
-      - name: Create the GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          version=${GITHUB_REF_NAME#v}
-          awk -v v="$version" '
-            $0 ~ "^## \\[" v "\\]" { found = 1; next }
-            found && /^## \[/ { exit }
-            found && /^\[.*\]: / { exit }
-            found { print }
-          ' packages/vue-cmdk/CHANGELOG.md > notes.md
-          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md

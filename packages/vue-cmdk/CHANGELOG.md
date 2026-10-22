@@ -26,5 +26,5 @@ The first version.
 - Replaceable labels for every built-in string.
 - An optional theme at `vue-cmdk-palette/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
 
-[Unreleased]: https://github.com/jantursky/vue-cmdk/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/jantursky/vue-cmdk/compare/1.0.0...HEAD
 [1.0.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.0.0
