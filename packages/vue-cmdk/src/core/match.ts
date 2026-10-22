@@ -24,10 +24,16 @@ interface Needle {
   readonly words: readonly string[]
 }
 
+// One keystroke scores every command against the same query, so the last parse is kept.
+let lastQuery = ''
+let lastNeedle: Needle | null = null
+
 const parseNeedle = (query: string): Needle | null => {
+  if (query === lastQuery) return lastNeedle
   const phrase = foldQuery(query.trim())
-  if (phrase === '') return null
-  return { phrase, words: [...new Set(phrase.split(/\s+/))] }
+  lastQuery = query
+  lastNeedle = phrase === '' ? null : { phrase, words: [...new Set(phrase.split(/\s+/))] }
+  return lastNeedle
 }
 
 /**

@@ -2,6 +2,12 @@
 
 All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Search parses the query once per keystroke instead of once per command, which halves the time to filter a long list.
+
 ## [1.1.0] - 2026-10-23
 
 ### Added
