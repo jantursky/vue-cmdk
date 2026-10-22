@@ -14,6 +14,13 @@ updates:
       # The peer range is the public contract; widen or raise it by hand.
       - dependency-name: vue
         update-types: [version-update:semver-major]
+      # TypeScript 7 is the native compiler without the JS API that typescript-eslint
+      # and @vue/compiler-sfc need. Move to it once both support it.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
+      # The types follow the oldest supported Node.js (engines: >=22.19), not the newest.
+      - dependency-name: '@types/node'
+        update-types: [version-update:semver-major]
 
   - package-ecosystem: github-actions
     directory: /
