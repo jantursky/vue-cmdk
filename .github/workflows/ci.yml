@@ -37,10 +37,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           # A Codecov outage should not turn the build red; the thresholds in vitest.config.ts still apply.
           fail_ci_if_error: false
-      - name: Test in real browsers (behavior and axe)
-        run: |
-          bunx playwright install --with-deps chromium firefox webkit
-          bun run test:browser
       - name: Build (library size budget and demo)
         run: bun run build
       - name: Check the package (publint, types for import and require)

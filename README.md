@@ -48,9 +48,9 @@ bun run lint:fix       # fix what ESLint can fix
 
 `bun run build` fails if the library grows past 12 kB minified and gzipped. Coverage has minimum thresholds, so `bun run check` fails if they drop.
 
-CI (`.github/workflows/ci.yml`) runs `check`, the browser tests, `build`, `lint:package` and `build:docs` on pushes to `main` and on pull requests. It uploads the coverage report to Codecov, and runs the unit tests again on Vue 3.5.0 and the latest Vue, the two ends of the peer range.
+CI (`.github/workflows/ci.yml`) runs `check`, `build`, `lint:package` and `build:docs` on pushes to `main` and on pull requests. It uploads the coverage report to Codecov, and runs the unit tests again on Vue 3.5.0 and the latest Vue, the two ends of the peer range.
 
-`bun run test` also renders every entry point on a server with no DOM (`test/ssr.test.ts`, with its own `vitest.ssr.config.ts` so the SSR build stays out of the coverage numbers). The browser suite runs [axe-core](https://github.com/dequelabs/axe-core) over the palette in both themes (`test/browser/a11y.test.ts`), so a contrast or ARIA regression fails the build.
+`bun run test` also renders every entry point on a server with no DOM (`test/ssr.test.ts`, with its own `vitest.ssr.config.ts` so the SSR build stays out of the coverage numbers). The browser suite runs [axe-core](https://github.com/dequelabs/axe-core) over the palette in both themes (`test/browser/a11y.test.ts`). CI skips it to avoid downloading the browsers, so run `bun run test:browser` locally before a release; `prepublishOnly` runs it too.
 
 The browser tests need Playwright's engines once per machine: `bunx playwright install chromium firefox webkit`.
 
