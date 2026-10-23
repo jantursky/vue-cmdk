@@ -52,6 +52,8 @@ export interface CommandPaletteEmits {
   select: [command: Command, mode: ActivationMode]
   error: [error: unknown, command: Command]
   close: []
+  /** A query that matched nothing, settled for 500 ms or pending at close. */
+  'no-results': [query: string, scope: string | null]
 }
 
 export interface ItemSlotProps {

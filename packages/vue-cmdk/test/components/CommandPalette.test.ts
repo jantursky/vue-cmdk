@@ -172,6 +172,25 @@ describe('detail and footer', () => {
     expect(wrapper.find('[data-cmdk-breadcrumb]').text()).toBe('Switch language')
   })
 
+  it('shows the remove hint only while a recent row is selected, with the platform caps', async () => {
+    const storage = { load: () => [{ id: 'docs', lastUsedAt: Date.now(), hitCount: 1 }], save: () => {} }
+    const hint = (wrapper: VueWrapper) =>
+      wrapper
+        .findAll('[data-cmdk-footer] [data-cmdk-hint]')
+        .find((h) => h.text().endsWith('remove'))
+        ?.findAll('kbd')
+        .map((k) => k.text())
+
+    vi.spyOn(navigator, 'platform', 'get').mockReturnValue('MacIntel')
+    const mac = render({ commands: COMMANDS, recents: { storage } })
+    expect(hint(mac)).toEqual(['⇧', '⌫'])
+    await mac.find('input').trigger('keydown', { key: 'ArrowDown' })
+    expect(hint(mac)).toBeUndefined()
+
+    vi.spyOn(navigator, 'platform', 'get').mockReturnValue('Win32')
+    expect(hint(render({ commands: COMMANDS, recents: { storage } }))).toEqual(['Shift', 'Del'])
+  })
+
   it('says "first N of M" when the list was capped', async () => {
     const many = Array.from({ length: 12 }, (_, i) => action(`c${i}`, `Item ${i}`))
     const wrapper = render({ commands: many, maxResults: 5 })

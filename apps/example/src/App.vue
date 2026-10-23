@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { CommandPaletteDialog, formatChord, type Command } from 'vue-cmdk-palette'
+import { onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { CommandPaletteDialog, formatChord, isApplePlatform, type Command } from 'vue-cmdk-palette'
 
 import { commands, groupOrder, scopes } from './commands'
 import CustomItemDemo from './demos/CustomItemDemo.vue'
 import HeadlessDemo from './demos/HeadlessDemo.vue'
 import InlineDemo from './demos/InlineDemo.vue'
 import ExamplesSection from './examples/ExamplesSection.vue'
-import { app, logAction, type ThemeChoice } from './state'
+import { app, logAction, logNoResults, type ThemeChoice } from './state'
 
 const version = __VUE_CMDK_VERSION__
 const open = ref(false)
+const palette = useTemplateRef<{ clearRecents: () => void }>('palette')
 const chord = formatChord('mod+k')
 
 // Hash routes, so link commands visibly "navigate" without a router dependency.
@@ -30,6 +31,11 @@ const navigate = (href: string): void => {
 
 const onError = (error: unknown, command: Command): void => {
   logAction(`${command.label} failed: ${error instanceof Error ? error.message : String(error)}`)
+}
+
+const clearHistory = (): void => {
+  palette.value?.clearRecents()
+  logAction('Cleared the recent history')
 }
 
 const INSTALL = 'bun add vue-cmdk-palette'
@@ -63,6 +69,7 @@ const KEYS: [string, string][] = [
   ['⇥  ⇧⇥', 'switch scope chips'],
   ['>', 'type first to list only Run commands'],
   ['⌫', 'go back from a nested list'],
+  [isApplePlatform() ? '⇧⌫' : 'Shift+Del', 'remove the selected recent'],
   ['Esc', 'clear, then go back, then close'],
 ]
 </script>
@@ -160,6 +167,12 @@ const KEYS: [string, string][] = [
           <li v-for="entry in app.log" :key="entry">{{ entry }}</li>
         </ol>
         <p v-else class="note">Nothing yet. Open the palette and pick something.</p>
+        <h3>Searches with no results</h3>
+        <ol v-if="app.noResults.length" class="log">
+          <li v-for="entry in app.noResults" :key="entry">{{ entry }}</li>
+        </ol>
+        <p v-else class="note">None yet. Search for something that isn't there, like <code>invoices</code>.</p>
+        <button type="button" class="button" @click="clearHistory">Clear history</button>
       </section>
 
       <CustomItemDemo />
@@ -178,6 +191,7 @@ const KEYS: [string, string][] = [
     </footer>
 
     <CommandPaletteDialog
+      ref="palette"
       v-model:open="open"
       :commands="commands"
       :scopes="scopes"
@@ -188,6 +202,7 @@ const KEYS: [string, string][] = [
       open-on-slash
       @select="(command, mode) => logAction(`${mode === 'alternate' ? 'Alt-' : ''}picked ${command.label}`)"
       @error="onError"
+      @no-results="logNoResults"
     />
   </div>
 </template>

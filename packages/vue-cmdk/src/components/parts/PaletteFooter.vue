@@ -2,14 +2,14 @@
 import { computed } from 'vue'
 
 import { useCommandPaletteContext } from '../../context'
-import { chordCaps as capsOf, modCap, parseChord } from '../../core/keys'
+import { chordCaps as capsOf, isApplePlatform, modCap, parseChord } from '../../core/keys'
 import { fillLabel, resultsLabel } from '../../core/labels'
 import Kbd from './Kbd.vue'
 
 const props = defineProps<{ chord?: string | false; verb: string }>()
 
 const palette = useCommandPaletteContext()
-const { list, labels, selected, currentPage } = palette
+const { list, labels, selected, currentPage, isRecent } = palette
 
 const count = computed(() => {
   const shown = list.value.rows.length
@@ -17,6 +17,9 @@ const count = computed(() => {
     ? fillLabel(labels.value.capped, { shown, matched: list.value.matched })
     : resultsLabel(labels.value, shown)
 })
+
+// Apple keyboards have no Delete key, so Shift+Backspace does the same there.
+const forgetCaps = (): string[] => (isApplePlatform() ? ['⇧', '⌫'] : ['Shift', 'Del'])
 
 const chordCaps = computed(() =>
   props.chord === undefined || props.chord === false ? null : capsOf(parseChord(props.chord)),
@@ -30,6 +33,7 @@ const chordCaps = computed(() =>
     <span v-if="selected?.command.alternateLabel" data-cmdk-hint>
       <Kbd :caps="[modCap(), '↵']" />{{ selected.command.alternateLabel }}
     </span>
+    <span v-if="selected && isRecent(selected)" data-cmdk-hint><Kbd :caps="forgetCaps()" />{{ labels.forget }}</span>
     <span v-if="currentPage" data-cmdk-hint><Kbd :caps="['⌫']" />{{ labels.back }}</span>
     <span v-if="chordCaps" data-cmdk-hint><Kbd :caps="chordCaps" />{{ labels.toggle }}</span>
     <span data-cmdk-count>{{ count }}</span>

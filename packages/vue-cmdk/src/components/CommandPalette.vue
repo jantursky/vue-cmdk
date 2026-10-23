@@ -37,6 +37,7 @@ const palette = useCommandPalette({
   onSelect: (command, mode) => emit('select', command, mode),
   onError: (error, command) => emit('error', error, command),
   onClose: () => emit('close'),
+  onNoResults: (needle, scope) => emit('no-results', needle, scope),
 })
 
 provide(COMMAND_PALETTE_KEY, palette)
@@ -128,6 +129,8 @@ defineExpose({
   back: palette.back,
   move: palette.move,
   activate: palette.activate,
+  forgetRecent: palette.forgetRecent,
+  clearRecents: palette.clearRecents,
   palette,
 })
 </script>

@@ -25,6 +25,10 @@ export const recordRecent = (
   return rankRecents([next, ...entries.filter((entry) => entry.id !== id)], now).slice(0, max)
 }
 
+/** The entries without `id`. The same array when `id` isn't stored, so the caller can skip the save. */
+export const forgetRecent = (entries: readonly RecentEntry[], id: string): readonly RecentEntry[] =>
+  entries.some((entry) => entry.id === id) ? entries.filter((entry) => entry.id !== id) : entries
+
 /** Whether activating this command should be remembered. */
 export const isTrackable = (command: Command): boolean => command.kind !== 'page' && command.trackRecent !== false
 

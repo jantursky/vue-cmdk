@@ -28,6 +28,7 @@ Options marked "ref or getter" accept a plain value, a `ref`, or a getter functi
 | `onSelect`    | `(command, mode) => void`                  |                                                                    |
 | `onError`     | `(error, command) => void`                 |                                                                    |
 | `onClose`     | `() => void`                               | Called when the palette asks to close.                             |
+| `onNoResults` | `(query, scope) => void`                   | A query matched nothing for 500 ms, or at close. Once per query.   |
 
 ### State
 
@@ -63,19 +64,21 @@ Options marked "ref or getter" accept a plain value, a `ref`, or a getter functi
 | `escape()`                  | Clears, goes back, or closes. Returns `'cleared'`, `'popped'` or `'closed'`. |
 | `reset()`                   | Back to the root with an empty query.                                        |
 | `close()`                   | Resets and calls `onClose`.                                                  |
+| `forgetRecent(id)`          | Removes one command from recents and saves.                                  |
+| `clearRecents()`            | Removes every recent of the current namespace and saves.                     |
 
 ### Helpers and getters
 
-`isSelected(row)`, `disabledReason(command)`, `quickSelectDigit(row)`, `onFieldKeydown(event)`, `onContainerKeydown(event)`, `fieldAttrs`, `listAttrs`, `rowAttrs(row)`, `groupAttrs(group)`, `chipAttrs(scope)`, `optionId(row)` and `headingId(group)`. See [Headless](/guides/headless) for how they fit together.
+`isSelected(row)`, `isRecent(row)`, `disabledReason(command)`, `quickSelectDigit(row)`, `onFieldKeydown(event)`, `onContainerKeydown(event)`, `fieldAttrs`, `listAttrs`, `rowAttrs(row)`, `groupAttrs(group)`, `chipAttrs(scope)`, `optionId(row)` and `headingId(group)`. See [Headless](/guides/headless) for how they fit together.
 
 ## Smaller composables
 
 These are what the components use internally, exported for headless builds.
 
-| composable                        | does                                                                                                    |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `useRecents(options)`             | Loads, ranks and records recents. Returns `entries`, `enabled`, `record(id)`, `resolve(commands)`.      |
-| `useHotkey(handler, options?)`    | A capture-phase `keydown` listener (on `document` unless `target` is set), removed on unmount.          |
-| `useFocusTrap(container, active)` | Keeps Tab inside an element and restores focus when it deactivates.                                     |
-| `useScrollLock(active)`           | Sets `overflow: hidden` on `body` while active and restores the old value.                              |
-| `useCommandPaletteContext()`      | In a component rendered inside a palette's slots, that palette's composable return. Throws outside one. |
+| composable                        | does                                                                                                                        |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `useRecents(options)`             | Loads, ranks and records recents. Returns `entries`, `enabled`, `record(id)`, `forget(id)`, `clear()`, `resolve(commands)`. |
+| `useHotkey(handler, options?)`    | A capture-phase `keydown` listener (on `document` unless `target` is set), removed on unmount.                              |
+| `useFocusTrap(container, active)` | Keeps Tab inside an element and restores focus when it deactivates.                                                         |
+| `useScrollLock(active)`           | Sets `overflow: hidden` on `body` while active and restores the old value.                                                  |
+| `useCommandPaletteContext()`      | In a component rendered inside a palette's slots, that palette's composable return. Throws outside one.                     |

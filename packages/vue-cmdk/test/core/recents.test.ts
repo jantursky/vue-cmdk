@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { buildList } from '../../src/core/list'
-import { isTrackable, recordRecent, resolveRecents, scoreRecent } from '../../src/core/recents'
+import { forgetRecent, isTrackable, recordRecent, resolveRecents, scoreRecent } from '../../src/core/recents'
 import type { RecentEntry } from '../../src/core/types'
 import { createLocalStorageAdapter } from '../../src/storage/localStorageAdapter'
 import { action, labels, page } from '../fixtures'
@@ -21,6 +21,21 @@ describe('recordRecent', () => {
     for (let i = 0; i < 40; i++) entries = recordRecent(entries, `c${i}`, NOW + i)
     expect(entries).toHaveLength(30)
     expect(recordRecent(entries, 'x', NOW, 5)).toHaveLength(5)
+  })
+})
+
+describe('forgetRecent', () => {
+  const entries: RecentEntry[] = [
+    { id: 'a', lastUsedAt: NOW, hitCount: 2 },
+    { id: 'b', lastUsedAt: NOW, hitCount: 1 },
+  ]
+
+  it('removes the entry with that id', () => {
+    expect(forgetRecent(entries, 'a')).toEqual([{ id: 'b', lastUsedAt: NOW, hitCount: 1 }])
+  })
+
+  it('returns the same array when the id is not stored', () => {
+    expect(forgetRecent(entries, 'missing')).toBe(entries)
   })
 })
 

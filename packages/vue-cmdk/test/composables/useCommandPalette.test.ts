@@ -377,6 +377,82 @@ describe('recents', () => {
     expect(labels(palette.list.value.groups[0]!.rows)).toEqual(['Why'])
   })
 
+  it('forgets and clears through the composable', async () => {
+    const storage = memory()
+    const commands = [action('a', 'Alpha'), action('b', 'Beta')]
+    const palette = setup({ commands, recents: { storage } })
+    await palette.activate(commands[0])
+    await palette.activate(commands[1])
+    palette.forgetRecent('a')
+    expect(labels(palette.list.value.groups[0]!.rows)).toEqual(['Beta'])
+    palette.clearRecents()
+    expect(palette.list.value.groups.some((g) => g.recent)).toBe(false)
+    expect(storage.saved.at(-1)).toEqual([])
+  })
+
+  describe('removing the selected recent by keyboard', () => {
+    const commands = [action('a', 'Alpha'), action('b', 'Beta'), action('c', 'Gamma'), action('d', 'Delta')]
+    const seeded = () => {
+      const now = Date.now()
+      const storage: RecentsAdapter & { saved: RecentEntry[][] } = {
+        saved: [],
+        load: () => [
+          { id: 'a', lastUsedAt: now, hitCount: 3 },
+          { id: 'b', lastUsedAt: now, hitCount: 2 },
+          { id: 'c', lastUsedAt: now, hitCount: 1 },
+        ],
+        save: (entries) => void storage.saved.push([...entries]),
+      }
+      return storage
+    }
+    const forgetKey = () => key({ key: isApplePlatform() ? 'Backspace' : 'Delete', shiftKey: true })
+
+    it('forgets the selected recent, keeps the position and announces it', () => {
+      const storage = seeded()
+      const palette = setup({ commands, recents: { storage } })
+      palette.move(1)
+      expect(palette.selected.value?.command.id).toBe('b')
+      const event = key({ key: 'Delete', shiftKey: true })
+      palette.onFieldKeydown(event)
+      expect(event.defaultPrevented).toBe(true)
+      expect(labels(palette.list.value.groups[0]!.rows)).toEqual(['Alpha', 'Gamma'])
+      expect(palette.selected.value?.command.id).toBe('c')
+      expect(palette.isRecent(palette.selected.value!)).toBe(true)
+      expect(storage.saved.at(-1)?.map((e) => e.id)).toEqual(['a', 'c'])
+      expect(palette.announcement.value).toBe('Removed Beta from recent')
+    })
+
+    it('uses the platform key and drops the notice once the list changes', () => {
+      const palette = setup({ commands, recents: { storage: seeded() } })
+      palette.onFieldKeydown(forgetKey())
+      expect(palette.announcement.value).toBe('Removed Alpha from recent')
+      palette.query.value = 'gam'
+      expect(palette.announcement.value).toBe('1 result')
+    })
+
+    it('leaves rows outside the Recent group alone', () => {
+      const storage = seeded()
+      const palette = setup({ commands, recents: { storage } })
+      palette.moveTo('last')
+      expect(palette.isRecent(palette.selected.value!)).toBe(false)
+      const event = key({ key: 'Delete', shiftKey: true })
+      palette.onFieldKeydown(event)
+      expect(event.defaultPrevented).toBe(false)
+      expect(storage.saved).toEqual([])
+    })
+
+    it('needs Shift and no other modifier', () => {
+      const storage = seeded()
+      const palette = setup({ commands, recents: { storage } })
+      for (const init of [{ key: 'Delete' }, { key: 'Delete', shiftKey: true, ...mod() }]) {
+        const event = key(init)
+        palette.onFieldKeydown(event)
+        expect(event.defaultPrevented).toBe(false)
+      }
+      expect(storage.saved).toEqual([])
+    })
+  })
+
   it('touches no storage when disabled', async () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     const commands = [action('a', 'A')]
@@ -394,6 +470,194 @@ describe('recents', () => {
     const palette = setup({ commands: [action('a', 'A')], recents: true })
     expect(palette.list.value.rows).toHaveLength(1)
     spy.mockRestore()
+  })
+})
+
+describe('forgetting and clearing recents', () => {
+  const now = Date.now()
+  const stored: RecentEntry[] = [
+    { id: 'a', lastUsedAt: now, hitCount: 3 },
+    { id: 'b', lastUsedAt: now, hitCount: 2 },
+    { id: 'c', lastUsedAt: now, hitCount: 1 },
+  ]
+  const memory = (initial: RecentEntry[]) => {
+    const saved: RecentEntry[][] = []
+    const storage: RecentsAdapter = { load: () => initial, save: (entries) => void saved.push([...entries]) }
+    return { saved, storage }
+  }
+  const recentsOf = (options: Parameters<typeof useRecents>[0]) => {
+    const scope = effectScope()
+    const recents = scope.run(() => useRecents(options))!
+    scopes.push(() => scope.stop())
+    return recents
+  }
+
+  it('forgets one id and saves the rest', () => {
+    const { saved, storage } = memory(stored)
+    const recents = recentsOf(() => ({ storage }))
+    recents.forget('b')
+    expect(recents.entries.value.map((e) => e.id)).toEqual(['a', 'c'])
+    expect(saved.at(-1)?.map((e) => e.id)).toEqual(['a', 'c'])
+  })
+
+  it('saves nothing when the id is not stored', () => {
+    const { saved, storage } = memory(stored)
+    recentsOf(() => ({ storage })).forget('missing')
+    expect(saved).toEqual([])
+  })
+
+  it('clears every entry and saves the empty list', () => {
+    const { saved, storage } = memory(stored)
+    const recents = recentsOf(() => ({ storage }))
+    recents.clear()
+    expect(recents.entries.value).toEqual([])
+    expect(saved).toEqual([[]])
+  })
+
+  it('does nothing when recents are disabled', () => {
+    const recents = recentsOf(() => false)
+    expect(() => {
+      recents.forget('a')
+      recents.clear()
+    }).not.toThrow()
+    expect(recents.entries.value).toEqual([])
+  })
+
+  it('replays a forget made while an async load is pending', async () => {
+    let finish!: (entries: RecentEntry[]) => void
+    const saved: RecentEntry[][] = []
+    const storage: RecentsAdapter = {
+      load: () => new Promise<RecentEntry[]>((r) => (finish = r)),
+      save: (entries) => void saved.push([...entries]),
+    }
+    const recents = recentsOf(() => ({ storage }))
+    recents.record('d')
+    recents.forget('a')
+    expect(saved).toEqual([])
+    finish(stored)
+    await flush()
+    expect(recents.entries.value.map((e) => e.id).sort()).toEqual(['b', 'c', 'd'])
+    expect(
+      saved
+        .at(-1)
+        ?.map((e) => e.id)
+        .sort(),
+    ).toEqual(['b', 'c', 'd'])
+  })
+
+  it('replays a clear made while an async load is pending', async () => {
+    let finish!: (entries: RecentEntry[]) => void
+    const saved: RecentEntry[][] = []
+    const storage: RecentsAdapter = {
+      load: () => new Promise<RecentEntry[]>((r) => (finish = r)),
+      save: (entries) => void saved.push([...entries]),
+    }
+    const recents = recentsOf(() => ({ storage }))
+    recents.clear()
+    finish(stored)
+    await flush()
+    expect(recents.entries.value).toEqual([])
+    expect(saved).toEqual([[]])
+  })
+
+  it('clears only the current namespace of the default adapter', () => {
+    localStorage.setItem(
+      'vue-cmdk:recents',
+      JSON.stringify({ version: 1, byNamespace: { a: stored, b: [{ id: 'y', lastUsedAt: now, hitCount: 1 }] } }),
+    )
+    recentsOf(() => ({ namespace: 'a' })).clear()
+    const kept = JSON.parse(localStorage.getItem('vue-cmdk:recents')!) as { byNamespace: Record<string, RecentEntry[]> }
+    expect(kept.byNamespace.a).toEqual([])
+    expect(kept.byNamespace.b?.map((e) => e.id)).toEqual(['y'])
+  })
+})
+
+describe('no-results notification', () => {
+  const scopes: Scope[] = [
+    { id: 'tools', label: 'Tools' },
+    { id: 'run', label: 'Run', prefix: '>' },
+  ]
+  const commands = [action('a', 'Alpha', { scope: 'tools' }), action('w', 'Wire', { scope: 'run' })]
+  const type = async (palette: ReturnType<typeof setup>, text: string) => {
+    palette.query.value = text
+    await nextTick()
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('reports a settled query once, with the scope prefix removed', async () => {
+    const onNoResults = vi.fn()
+    const palette = setup({ commands, scopes, onNoResults })
+    await type(palette, '>invoices')
+    vi.advanceTimersByTime(499)
+    expect(onNoResults).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1)
+    expect(onNoResults).toHaveBeenCalledExactlyOnceWith('invoices', 'run')
+    vi.advanceTimersByTime(2000)
+    expect(onNoResults).toHaveBeenCalledOnce()
+  })
+
+  it('reports only the last of quick keystrokes', async () => {
+    const onNoResults = vi.fn()
+    const palette = setup({ commands, onNoResults })
+    for (const text of ['x', 'xy', 'xyz']) {
+      await type(palette, text)
+      vi.advanceTimersByTime(100)
+    }
+    vi.advanceTimersByTime(500)
+    expect(onNoResults.mock.calls).toEqual([['xyz', null]])
+  })
+
+  it('does not report the same query and scope twice in a row', async () => {
+    const onNoResults = vi.fn()
+    const palette = setup({ commands, onNoResults })
+    await type(palette, 'xyz')
+    vi.advanceTimersByTime(500)
+    await type(palette, 'alp')
+    await type(palette, 'xyz')
+    vi.advanceTimersByTime(500)
+    expect(onNoResults).toHaveBeenCalledOnce()
+  })
+
+  it('reports a pending query at close', async () => {
+    const onNoResults = vi.fn()
+    const palette = setup({ commands, onNoResults })
+    await type(palette, 'xyz')
+    vi.advanceTimersByTime(100)
+    palette.close()
+    expect(onNoResults).toHaveBeenCalledExactlyOnceWith('xyz', null)
+    vi.advanceTimersByTime(1000)
+    expect(onNoResults).toHaveBeenCalledOnce()
+  })
+
+  it('reports a pending query when the palette is unmounted', async () => {
+    const onNoResults = vi.fn()
+    const scope = effectScope()
+    const palette = scope.run(() => useCommandPalette({ commands, recents: false, onNoResults }))!
+    await type(palette, 'xyz')
+    scope.stop()
+    expect(onNoResults).toHaveBeenCalledExactlyOnceWith('xyz', null)
+  })
+
+  it('stays quiet while a query has results, and while children load', async () => {
+    const onNoResults = vi.fn()
+    let finish!: (items: Command[]) => void
+    const slow = page('slow', 'Slow', () => new Promise<Command[]>((r) => (finish = r)))
+    const palette = setup({ commands: [...commands, slow], onNoResults })
+    await type(palette, 'alp')
+    vi.advanceTimersByTime(1000)
+    await type(palette, 'zzz')
+    void palette.activate(slow)
+    await nextTick()
+    expect(palette.loading.value).toBe(true)
+    vi.advanceTimersByTime(1000)
+    expect(onNoResults).not.toHaveBeenCalled()
+    finish([])
   })
 })
 

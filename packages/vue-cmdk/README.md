@@ -146,6 +146,8 @@ const storage: RecentsAdapter = {
 }
 ```
 
+Shift+Delete (Shift+Backspace on a Mac) removes the selected row from the Recent group. To clear history from a settings page, call `clearRecents()` or `forgetRecent(id)` on a template ref. Both also work while the dialog is closed.
+
 ## Slots
 
 | slot            | props                                                    |
@@ -226,7 +228,7 @@ The attribute getters (`fieldAttrs`, `listAttrs`, `rowAttrs`, `groupAttrs`, `chi
 | `to`            | `'body'`          | The Teleport target.                                       |
 | `trap-focus`    | `true`            |                                                            |
 
-Events: `select(command, mode)`, `error(error, command)`, `close()` (inline only), `update:open`, `update:query`.
+Events: `select(command, mode)`, `error(error, command)`, `close()` (inline only), `no-results(query, scope)`, `update:open`, `update:query`. `no-results` fires once for a query that matched nothing and stayed unchanged for 500 ms, so you can send it straight to analytics.
 
 ## Keyboard
 
@@ -239,6 +241,7 @@ Events: `select(command, mode)`, `error(error, command)`, `close()` (inline only
 | ⌘1-9 / Ctrl+1-9     | Activate the row at that position. Add ⇧ for alternate activation. |
 | ⇥ / ⇧⇥              | Next or previous scope.                                            |
 | ⌫ on an empty field | Go back one page.                                                  |
+| ⇧⌦ / ⇧⌫ on a Mac    | Remove the selected row from recents, in the Recent group only.    |
 | Esc                 | Clear the query, then go back one page, then close.                |
 
 Change the dialog's shortcut with `hotkey`, for example `hotkey="mod+shift+p"` or `hotkey="alt+space"`. Modifiers are `mod` (⌘ on a Mac, Ctrl elsewhere), `ctrl`, `meta`, `alt` and `shift`, and they must match exactly. Shortcuts with ⌥ work on a Mac too, even though ⌥ changes the character a key types there. For several shortcuts at once, set `:hotkey="false"` and call `useHotkey` with `parseChord` and `matchesChord`. To open the palette from code, set `v-model:open`, or call `show()`, `hide()` or `toggle()` on a template ref.

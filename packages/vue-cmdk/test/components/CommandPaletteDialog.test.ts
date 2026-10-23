@@ -1,12 +1,14 @@
 import { mount, type VueWrapper } from '@vue/test-utils'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, ref, useTemplateRef } from 'vue'
 
 import CommandPaletteDialog from '../../src/components/CommandPaletteDialog.vue'
+import type { CommandPaletteEmits } from '../../src/components/types'
 import { useFocusTrap } from '../../src/composables/useFocusTrap'
 import { useHotkey } from '../../src/composables/useHotkey'
 import { useScrollLock } from '../../src/composables/useScrollLock'
 import { isApplePlatform } from '../../src/core/keys'
+import type { RecentEntry, RecentsAdapter } from '../../src/core/types'
 import { action, page } from '../fixtures'
 
 const wrappers: VueWrapper[] = []
@@ -192,6 +194,95 @@ describe('focus and scroll', () => {
     expect(document.activeElement).toBe(input())
     expect(document.querySelector('[data-cmdk-chip][data-active="true"]')?.textContent).toContain('X')
     wrapper.unmount()
+  })
+})
+
+describe('no-results event', () => {
+  it('types the handler arguments', () => {
+    expectTypeOf<CommandPaletteEmits['no-results']>().toEqualTypeOf<[query: string, scope: string | null]>()
+  })
+
+  it('forwards a settled query that matched nothing, and one pending when closed by the chord', async () => {
+    vi.useFakeTimers()
+    try {
+      const wrapper = render({ open: true })
+      await nextTick()
+      await wrapper.findComponent({ name: 'CommandPalette' }).find('input').setValue('zebra')
+      vi.advanceTimersByTime(500)
+      expect(wrapper.emitted('no-results')).toEqual([['zebra', null]])
+
+      await wrapper.findComponent({ name: 'CommandPalette' }).find('input').setValue('quokka')
+      press({ key: 'k', ...mod() })
+      await nextTick()
+      expect(dialog()).toBeNull()
+      expect(wrapper.emitted('no-results')?.at(-1)).toEqual(['quokka', null])
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+})
+
+describe('recents methods', () => {
+  interface Exposed {
+    forgetRecent: (id: string) => void
+    clearRecents: () => void
+  }
+  const memory = (initial: RecentEntry[]) => {
+    let stored = initial
+    const saves: RecentEntry[][] = []
+    const storage: RecentsAdapter = {
+      load: () => stored,
+      save: (entries) => {
+        stored = [...entries]
+        saves.push(stored)
+      },
+    }
+    return { saves, storage }
+  }
+  const entries = (): RecentEntry[] => [
+    { id: 'a', lastUsedAt: Date.now(), hitCount: 2 },
+    { id: 'b', lastUsedAt: Date.now(), hitCount: 1 },
+  ]
+  const recentLabels = () =>
+    [...document.querySelectorAll('[data-cmdk-group]')]
+      .filter((group) => group.textContent.startsWith('Recent'))
+      .flatMap((group) => [...group.querySelectorAll('[data-cmdk-item]')]).length
+
+  it('edits storage while closed, keeping picks saved since mount', () => {
+    const { saves, storage } = memory(entries())
+    const wrapper = render({ recents: { storage } })
+    const exposed = wrapper.vm as unknown as Exposed
+    // A pick saved after mount, as an open palette would have done.
+    void storage.save([...entries(), { id: 'c', lastUsedAt: Date.now(), hitCount: 1 }])
+    exposed.forgetRecent('a')
+    expect(saves.at(-1)?.map((e) => e.id)).toEqual(['b', 'c'])
+    exposed.forgetRecent('missing')
+    expect(saves).toHaveLength(2)
+    exposed.clearRecents()
+    expect(saves.at(-1)).toEqual([])
+  })
+
+  it('delegates to the open palette, which updates the Recent group', async () => {
+    const { saves, storage } = memory(entries())
+    const wrapper = render({ open: true, recents: { storage } })
+    await nextTick()
+    expect(recentLabels()).toBe(2)
+    const exposed = wrapper.vm as unknown as Exposed
+    exposed.forgetRecent('a')
+    await nextTick()
+    expect(recentLabels()).toBe(1)
+    exposed.clearRecents()
+    await nextTick()
+    expect(recentLabels()).toBe(0)
+    expect(saves.at(-1)).toEqual([])
+  })
+
+  it('does nothing when recents are disabled', () => {
+    const exposed = render().vm as unknown as Exposed
+    expect(() => {
+      exposed.forgetRecent('a')
+      exposed.clearRecents()
+    }).not.toThrow()
   })
 })
 

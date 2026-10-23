@@ -28,6 +28,27 @@ Two palettes on one page should use different keys or namespaces, or they will s
 
 Every `action` and `link` is recorded when it runs, unless it sets `trackRecent: false`. Opening a `page` isn't recorded. Ids that no longer match a command are skipped when the list is drawn, so a removed command never leaves a dead row behind.
 
+## Removing recents
+
+While a row in the Recent group is selected, Shift+Delete removes it from recents. Apple keyboards have no Delete key, so Shift+Backspace does the same there. The selection stays where it was, the footer shows the key while a recent row is selected, and screen readers hear "Removed … from recent".
+
+To remove entries from code, for example from a "Clear history" button on a settings page, call the methods on a template ref:
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+
+const palette = useTemplateRef('palette')
+</script>
+
+<template>
+  <CommandPaletteDialog ref="palette" :commands="commands" />
+  <button type="button" @click="palette?.clearRecents()">Clear history</button>
+</template>
+```
+
+`forgetRecent(id)` removes one command, and `clearRecents()` removes every entry of the current namespace. Other namespaces are kept. Both save through the configured storage, and both work while the dialog is closed. The headless composable has the same two methods.
+
 ## Your own storage
 
 To keep recents on a server or in IndexedDB, pass an adapter. Both methods can be sync or async:
@@ -41,6 +62,6 @@ const storage: RecentsAdapter = {
 }
 ```
 
-Whatever `load` returns is checked, and malformed entries are dropped. If someone picks a command before an async `load` has finished, the pick is kept and merged in once the stored list arrives.
+Whatever `load` returns is checked, and malformed entries are dropped. If someone picks, removes or clears before an async `load` has finished, the change is kept and applied to the stored list once it arrives.
 
 The default adapter swallows storage errors, such as a private window with storage blocked, so recents stay empty.

@@ -3,9 +3,11 @@ import { computed, useTemplateRef, watch } from 'vue'
 
 import { useFocusTrap } from '../composables/useFocusTrap'
 import { useHotkey } from '../composables/useHotkey'
+import { editStoredRecents, recentsOptionsOf } from '../composables/useRecents'
 import { useScrollLock } from '../composables/useScrollLock'
 import { isEditableTarget, matchesChord, parseChord } from '../core/keys'
 import { DEFAULT_LABELS } from '../core/labels'
+import { forgetRecent } from '../core/recents'
 import CommandPalette from './CommandPalette.vue'
 import {
   PALETTE_DEFAULTS,
@@ -36,7 +38,11 @@ const open = defineModel<boolean>('open', { default: false })
 const query = defineModel<string>('query', { default: '' })
 
 const panel = useTemplateRef<HTMLElement>('panel')
-const palette = useTemplateRef<{ focus: () => void }>('palette')
+const palette = useTemplateRef<{
+  focus: () => void
+  forgetRecent: (id: string) => void
+  clearRecents: () => void
+}>('palette')
 
 const paletteProps = computed<CommandPaletteProps>(() => ({
   commands: props.commands,
@@ -96,11 +102,22 @@ const onBackdrop = (): void => {
   if (props.dismissible) open.value = false
 }
 
+// The open palette owns the live list. While closed nothing is mounted, so storage is
+// edited directly, and the next open loads the result.
 defineExpose({
   show: () => (open.value = true),
   hide: () => (open.value = false),
   toggle: () => (open.value = !open.value),
   focus: () => palette.value?.focus(),
+  forgetRecent: (id: string): void => {
+    if (palette.value === null)
+      editStoredRecents(recentsOptionsOf(props.recents), (entries) => forgetRecent(entries, id))
+    else palette.value.forgetRecent(id)
+  },
+  clearRecents: (): void => {
+    if (palette.value === null) editStoredRecents(recentsOptionsOf(props.recents), () => [])
+    else palette.value.clearRecents()
+  },
 })
 </script>
 
@@ -114,6 +131,7 @@ defineExpose({
           v-model:query="query"
           @select="(command, mode) => emit('select', command, mode)"
           @error="(error, command) => emit('error', error, command)"
+          @no-results="(needle, scope) => emit('no-results', needle, scope)"
           @close="open = false"
         >
           <template v-if="$slots.item" #item="slotProps"><slot name="item" v-bind="slotProps" /></template>

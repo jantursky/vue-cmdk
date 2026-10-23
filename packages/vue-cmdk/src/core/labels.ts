@@ -13,6 +13,7 @@ export const DEFAULT_LABELS: Readonly<PaletteLabels> = {
   open: 'open',
   run: 'run',
   back: 'back',
+  forget: 'remove',
   toggle: 'open / close',
   scope: 'scope',
   clear: 'Clear the search',
@@ -20,6 +21,7 @@ export const DEFAULT_LABELS: Readonly<PaletteLabels> = {
   results: '{count} results',
   resultsOne: '{count} result',
   capped: 'first {shown} of {matched}',
+  forgotten: 'Removed {label} from recent',
 }
 
 export const fillLabel = (template: string, values: Readonly<Record<string, number | string>>): string =>

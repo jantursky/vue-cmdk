@@ -4,6 +4,13 @@ All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+
+- Shift+Delete removes the selected row from the Recent group. Apple keyboards have no Delete key, so Shift+Backspace does the same there. The selection stays in place, the footer shows the key while a recent row is selected, and the live region announces the removal.
+- `forgetRecent(id)` and `clearRecents()` on `useCommandPalette` and on the template refs of `<CommandPalette>` and `<CommandPaletteDialog>`, plus `forget(id)` and `clear()` on `useRecents`. They save through the configured storage, and the dialog's methods also work while it's closed, so a settings page can offer "Clear history".
+- A `no-results` event (`onNoResults` in the composable) with the query and the scope, fired once for a query that matched nothing and stayed unchanged for 500 ms, or right away if the palette closes first.
+- Labels `forget` and `forgotten`, and `isRecent(row)` on the composable.
+
 ### Fixed
 
 - Search parses the query once per keystroke instead of once per command, which halves the time to filter a long list.

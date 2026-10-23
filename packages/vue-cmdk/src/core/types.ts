@@ -157,6 +157,8 @@ export interface PaletteLabels {
   open: string
   run: string
   back: string
+  /** Footer hint for removing the selected recent row. */
+  forget: string
   toggle: string
   scope: string
   clear: string
@@ -167,4 +169,6 @@ export interface PaletteLabels {
   resultsOne: string
   /** Footer count when the list was capped. `{shown}` and `{matched}` are replaced. */
   capped: string
+  /** Live-region text after a recent row is removed. `{label}` is replaced. */
+  forgotten: string
 }

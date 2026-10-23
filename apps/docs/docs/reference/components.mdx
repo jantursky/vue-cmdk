@@ -41,19 +41,31 @@ description: Props, events, slots and labels for CommandPalette and CommandPalet
 | `select`       | `command, mode`  | An action or link was activated.                         |
 | `error`        | `error, command` | `perform` or a page loader threw or rejected.            |
 | `close`        |                  | Inline only: the palette asked to close (Escape, a run). |
+| `no-results`   | `query, scope`   | A query matched nothing. See below.                      |
 | `update:open`  | `boolean`        | Dialog only: the dialog opened or closed itself.         |
 | `update:query` | `string`         | The query changed.                                       |
 
 `mode` is `'primary'` or `'alternate'`.
 
+`no-results` fires once a query that matches nothing has stayed unchanged for 500 ms, or right away if the palette closes before then. `query` has any scope prefix removed, and `scope` is the scope id in force or `null`. The same query and scope aren't reported twice in a row, so the handler can send straight to analytics:
+
+```vue
+<CommandPaletteDialog
+  :commands="commands"
+  @no-results="(query, scope) => track('palette_no_results', { query, scope })"
+/>
+```
+
 ## Exposed methods
 
 Reach these through a template ref.
 
-| component              | exposes                                                                                                   |
-| ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| `CommandPalette`       | `focus()`, `reset()`, `back()`, `move(step)`, `activate(row)`, and `palette`, the full composable return. |
-| `CommandPaletteDialog` | `show()`, `hide()`, `toggle()`, `focus()`.                                                                |
+| component              | exposes                                                                                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CommandPalette`       | `focus()`, `reset()`, `back()`, `move(step)`, `activate(row)`, `forgetRecent(id)`, `clearRecents()`, and `palette`, the full composable return. |
+| `CommandPaletteDialog` | `show()`, `hide()`, `toggle()`, `focus()`, `forgetRecent(id)`, `clearRecents()`.                                                                |
+
+The dialog's recents methods work while it's closed too. They write straight to the configured storage, and the next open shows the result.
 
 ## Slots
 
@@ -75,6 +87,7 @@ See [Custom rows and slots](/guides/custom-rows#slots).
 | `open`        | `open`                                                        |
 | `run`         | `run`                                                         |
 | `back`        | `back`                                                        |
+| `forget`      | `remove`                                                      |
 | `toggle`      | `open / close`                                                |
 | `scope`       | `scope`                                                       |
 | `clear`       | `Clear the search`                                            |
@@ -82,3 +95,4 @@ See [Custom rows and slots](/guides/custom-rows#slots).
 | `results`     | `{count} results`                                             |
 | `resultsOne`  | `{count} result`                                              |
 | `capped`      | `first {shown} of {matched}`                                  |
+| `forgotten`   | `Removed {label} from recent`                                 |

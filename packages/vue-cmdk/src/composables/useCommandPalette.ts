@@ -1,7 +1,9 @@
 import {
   computed,
   getCurrentInstance,
+  getCurrentScope,
   isRef,
+  onScopeDispose,
   ref,
   shallowReadonly,
   shallowRef,
@@ -15,7 +17,7 @@ import {
 } from 'vue'
 
 import { isApplePlatform, isModOnly } from '../core/keys'
-import { DEFAULT_LABELS, resultsLabel } from '../core/labels'
+import { DEFAULT_LABELS, fillLabel, resultsLabel } from '../core/labels'
 import { buildList } from '../core/list'
 import { isTrackable } from '../core/recents'
 import { nextScope, withoutScopePrefix, type ScopeChoice } from '../core/scopes'
@@ -30,7 +32,7 @@ import type {
   RankedRow,
   Scope,
 } from '../core/types'
-import { useRecents, type RecentsOptions } from './useRecents'
+import { recentsOptionsOf, useRecents, type RecentsOptions } from './useRecents'
 
 export interface OpenPage {
   readonly command: PageCommand
@@ -62,6 +64,11 @@ export interface UseCommandPaletteOptions {
   readonly onError?: (error: unknown, command: Command) => void
   /** Called when the palette asks to be closed (activation, Escape). */
   readonly onClose?: () => void
+  /**
+   * Called once for a query that matched nothing and stayed unchanged for 500 ms,
+   * with the query (scope prefix removed) and the scope in force.
+   */
+  readonly onNoResults?: (query: string, scope: string | null) => void
 }
 
 export type EscapeOutcome = 'cleared' | 'popped' | 'closed'
@@ -83,6 +90,8 @@ export interface UseCommandPaletteReturn {
   /** The enabled rows, in drawn order: the ring the selection walks. */
   readonly reachable: ComputedRef<readonly RankedRow[]>
   readonly selected: ComputedRef<RankedRow | undefined>
+  /** Whether the row is listed in the Recent group. */
+  readonly isRecent: (row: RankedRow) => boolean
   readonly labels: ComputedRef<PaletteLabels>
   readonly placeholder: ComputedRef<string>
   readonly breadcrumb: ComputedRef<readonly string[]>
@@ -101,6 +110,10 @@ export interface UseCommandPaletteReturn {
   readonly escape: () => EscapeOutcome
   readonly reset: () => void
   readonly close: () => void
+  /** Removes one command id from recents and saves the change. */
+  readonly forgetRecent: (id: string) => void
+  /** Removes every recent entry of the current namespace and saves the change. */
+  readonly clearRecents: () => void
 
   readonly isSelected: (row: RankedRow) => boolean
   readonly disabledReason: (command: Command) => string | null
@@ -120,6 +133,9 @@ export interface UseCommandPaletteReturn {
 }
 
 let fallbackId = 0
+
+/** How long a query that matches nothing must stay unchanged before it is reported. */
+const NO_RESULTS_DELAY = 500
 
 // `process.env.NODE_ENV` on purpose: the consumer's bundler replaces it, while
 // `import.meta.env.DEV` would be frozen at the library's own build time.
@@ -152,12 +168,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
   const labels = computed<PaletteLabels>(() => ({ ...DEFAULT_LABELS, ...toValue(options.labels) }))
   const filter = (): FilterFn | undefined => (isRef(options.filter) ? options.filter.value : options.filter)
 
-  const recentsOptions = (): RecentsOptions | false => {
-    const value = toValue(options.recents)
-    if (value === false) return false
-    return value === true || value === undefined ? {} : value
-  }
-  const recents = useRecents(recentsOptions)
+  const recents = useRecents(() => recentsOptionsOf(toValue(options.recents)))
 
   if (isDev()) {
     watch(
@@ -205,6 +216,11 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
   const rowIndex = computed(() => new Map(list.value.rows.map((row, index) => [row, index])))
   const reachableIndex = computed(() => new Map(reachable.value.map((row, index) => [row, index])))
   const groupIndex = computed(() => new Map(list.value.groups.map((group, index) => [group, index])))
+  const recentRows = computed(() => new Set(list.value.groups.find((group) => group.recent)?.rows))
+  const isRecent = (row: RankedRow): boolean => recentRows.value.has(row)
+
+  // A one-off announcement, kept only while the list it describes is still current.
+  const notice = shallowRef<{ text: string; list: PaletteList } | null>(null)
 
   watch([query, () => list.value.scope, () => pages.value.length], () => {
     cursor.value = 0
@@ -239,7 +255,40 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
     cursor.value = 0
   }
 
+  // No-results reporting: one timer, restarted on every change to what the query found.
+  let noResultsTimer: ReturnType<typeof setTimeout> | undefined
+  let pendingReport: { readonly needle: string; readonly scope: string | null } | null = null
+  // The same query and scope are not reported twice in a row.
+  let lastReported: string | null = null
+  const reportKey = (needle: string, choice: string | null): string => `${choice ?? ''}\u0000${needle}`
+
+  const reportNoResults = (): void => {
+    clearTimeout(noResultsTimer)
+    const pending = pendingReport
+    pendingReport = null
+    if (pending === null) return
+    lastReported = reportKey(pending.needle, pending.scope)
+    options.onNoResults?.(pending.needle, pending.scope)
+  }
+
+  watch(
+    [() => list.value.needle, () => list.value.scope, loading, () => list.value.matched],
+    ([needle, active, busy, matched]) => {
+      clearTimeout(noResultsTimer)
+      pendingReport = null
+      if (options.onNoResults === undefined || needle === '' || busy || matched > 0) return
+      if (reportKey(needle, active) === lastReported) return
+      pendingReport = { needle, scope: active }
+      noResultsTimer = setTimeout(reportNoResults, NO_RESULTS_DELAY)
+    },
+  )
+
+  // Unmounting closes the palette too (a dialog closed by its chord or backdrop), so a
+  // pending query is reported rather than dropped.
+  if (getCurrentScope() !== undefined) onScopeDispose(reportNoResults)
+
   const close = (): void => {
+    reportNoResults()
     reset()
     options.onClose?.()
   }
@@ -334,6 +383,20 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
   // eslint-disable-next-line @typescript-eslint/no-deprecated
   const composing = (event: KeyboardEvent): boolean => event.isComposing || event.keyCode === 229
 
+  /**
+   * Shift+Delete, or Shift+Backspace on Apple keyboards that have no Delete key.
+   * The cursor stays put, so the row that moves up into its place is selected.
+   */
+  const forgetSelected = (event: KeyboardEvent): boolean => {
+    const row = selected.value
+    if (!event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) return false
+    if (row === undefined || !isRecent(row)) return false
+    event.preventDefault()
+    recents.forget(row.command.id)
+    notice.value = { text: fillLabel(labels.value.forgotten, { label: row.command.label }), list: list.value }
+    return true
+  }
+
   const onFieldKeydown = (event: KeyboardEvent): void => {
     if (composing(event)) return
     switch (event.key) {
@@ -359,7 +422,12 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
         event.preventDefault()
         cycleScope(event.shiftKey ? -1 : 1)
         return
+      case 'Delete':
+        forgetSelected(event)
+        return
       case 'Backspace':
+        // The Recent group shows only for an empty root query, where Backspace has no text to delete.
+        if (isApplePlatform() && forgetSelected(event)) return
         if (query.value === '' && pages.value.length > 0) {
           event.preventDefault()
           back()
@@ -447,6 +515,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
 
   const announcement = computed(() => {
     if (loading.value) return labels.value.loading
+    if (notice.value?.list === list.value) return notice.value.text
     const count = list.value.rows.length
     return count === 0 ? labels.value.empty : resultsLabel(labels.value, count)
   })
@@ -462,6 +531,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
     list,
     reachable,
     selected,
+    isRecent,
     labels,
     placeholder,
     breadcrumb,
@@ -477,6 +547,8 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
     escape,
     reset,
     close,
+    forgetRecent: recents.forget,
+    clearRecents: recents.clear,
     isSelected,
     disabledReason,
     quickSelectDigit,
