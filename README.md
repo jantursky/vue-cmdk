@@ -12,11 +12,33 @@
 
 A small, accessible command palette for Vue 3. This repository holds the library, a demo app and the docs site.
 
-| Dark theme                                                                                                                           | Light theme, with search highlights                                                                                              |
-| ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| ![The palette in the dark theme, with scope chips, grouped rows and the detail panel](apps/docs/public/screenshots/palette-dark.jpg) | ![The palette in the light theme, filtered by "to", with the matches underlined](apps/docs/public/screenshots/palette-light.jpg) |
-| **Restyled with variables**                                                                                                          | **Restyled with custom CSS**                                                                                                     |
-| ![A warm serif theme made only with --cmdk-* variables](apps/docs/public/screenshots/example-theme-variables.jpg)                    | ![A terminal-style theme made with rules on the data-cmdk-* attributes](apps/docs/public/screenshots/example-custom-css.jpg)     |
+<a href="https://vue-cmdk.vercel.app">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/palette-dark.png" />
+    <img src=".github/assets/palette-light.png" alt="The command palette dialog filtered by &quot;to&quot;: scope chips with counts, rows grouped into Run, Pages and Settings with the matches underlined, and a detail panel for the selected row" />
+  </picture>
+</a>
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="https://vue-cmdk.vercel.app">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset=".github/assets/overview-dark.png" />
+          <img src=".github/assets/overview-light.png" alt="The demo page: the hero with the install command, and the inline palette below it" />
+        </picture>
+      </a>
+    </td>
+    <td width="50%">
+      <a href="https://vue-cmdk.vercel.app/#example-theme">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset=".github/assets/themed-dark.png" />
+          <img src=".github/assets/themed-light.png" alt="The same palette restyled with --cmdk-* variables into a warm serif theme, above a terminal-style one made with custom CSS" />
+        </picture>
+      </a>
+    </td>
+  </tr>
+</table>
 
 | folder              | what it is                                                                              |
 | ------------------- | --------------------------------------------------------------------------------------- |

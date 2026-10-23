@@ -10,7 +10,7 @@
 
 [Docs](https://vue-cmdk-docs.vercel.app) · [Demo](https://vue-cmdk.vercel.app) · [Changelog](https://github.com/jantursky/vue-cmdk/blob/main/packages/vue-cmdk/CHANGELOG.md) · [GitHub](https://github.com/jantursky/vue-cmdk)
 
-![The palette in the dark theme, with scope chips, grouped rows and the detail panel](https://raw.githubusercontent.com/jantursky/vue-cmdk/main/apps/docs/public/screenshots/palette-dark.jpg)
+<a href="https://vue-cmdk.vercel.app"><img src="https://raw.githubusercontent.com/jantursky/vue-cmdk/main/.github/assets/palette-light.png" alt="The command palette dialog filtered by &quot;to&quot;: scope chips with counts, rows grouped into Run, Pages and Settings with the matches underlined, and a detail panel for the selected row" /></a>
 
 A small command palette for Vue 3 that works well from the keyboard and with screen readers.
 
