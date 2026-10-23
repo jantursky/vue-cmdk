@@ -1,19 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- vue-cmdk mark: a keycap with K, and ⌘ as the corner legend. -->
+  <!-- vue-cmdk mark: a keycap with K, and ⌘ as the corner legend, in Vue's green and slate. -->
   <style>
-    .cap { fill: #15171c; }
+    .cap { fill: #35495e; }
     .face { fill: #ffffff; }
-    .k { stroke: #15171c; }
-    .cmd { stroke: #0f8a7e; }
+    .cmd, .k { stroke: #42b883; }
     @media (prefers-color-scheme: dark) {
-      .cap { fill: #eceef2; }
+      .cap { fill: #c9d5e1; }
       .face { fill: #17191e; }
-      .k { stroke: #eceef2; }
-      .cmd { stroke: #3fc1b0; }
+      .cmd, .k { stroke: #42d392; }
     }
   </style>
   <rect class="cap" x="2.5" y="2.5" width="27" height="27" rx="7.5" />
   <rect class="face" x="5" y="4" width="22" height="20.5" rx="5.5" />
   <g class="cmd" fill="none" stroke-width="1.25" stroke-linecap="round"><circle cx="8.05" cy="7.45" r="1.1"/><circle cx="12.75" cy="7.45" r="1.1"/><circle cx="8.05" cy="12.15" r="1.1"/><circle cx="12.75" cy="12.15" r="1.1"/><path d="M9.15 7.45V12.15M11.65 7.45V12.15M8.05 8.55H12.75M8.05 11.05H12.75"/></g>
-  <path class="k" d="M16 9V20.5M23 9L16.5 14.9M18.9 12.8L23 20.5" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path class="k" d="M16 9V20.5M23 9L16.5 14.9M18.9 12.8L23 20.5" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
 </svg>
