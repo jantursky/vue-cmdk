@@ -51,7 +51,8 @@
     "cmdk",
     "command-menu",
     "combobox",
-    "a11y"
+    "a11y",
+    "headless"
   ],
   "scripts": {
     "build": "vite build",
