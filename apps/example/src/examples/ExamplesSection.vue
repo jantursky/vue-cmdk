@@ -4,6 +4,8 @@ import compactSource from './CompactExample.vue?raw'
 import ExampleCard from './ExampleCard.vue'
 import FullExample from './FullExample.vue'
 import fullSource from './FullExample.vue?raw'
+import HeadlessExample from './HeadlessExample.vue'
+import headlessSource from './HeadlessExample.vue?raw'
 import MinimalExample from './MinimalExample.vue'
 import minimalSource from './MinimalExample.vue?raw'
 import TerminalExample from './TerminalExample.vue'
@@ -24,7 +26,7 @@ createApp(App).mount('#app')`
   <section class="examples" aria-labelledby="examples-title">
     <header class="examples-head">
       <p class="eyebrow">Examples</p>
-      <h2 id="examples-title" class="section-title">Five palettes, <span class="accent">one</span> library.</h2>
+      <h2 id="examples-title" class="section-title">Six palettes, <span class="accent">one</span> library.</h2>
       <p>
         Each example is one self-contained component. Open <em>View source</em> to read the exact file that runs on this
         page.
@@ -35,6 +37,7 @@ createApp(App).mount('#app')`
         <a href="#example-full">Full</a>
         <a href="#example-theme">Theme variables</a>
         <a href="#example-terminal">Custom CSS</a>
+        <a href="#example-headless">Headless</a>
       </nav>
     </header>
 
@@ -97,6 +100,20 @@ createApp(App).mount('#app')`
           </p>
         </template>
         <TerminalExample />
+      </ExampleCard>
+
+      <ExampleCard
+        id="example-headless"
+        title="Headless"
+        :files="[{ name: 'HeadlessExample.vue', code: headlessSource }]"
+      >
+        <template #description>
+          <p>
+            <code>useCommandPalette()</code> with your own input and list. The composable gives the ranking, the
+            selection and the ARIA ids, and the markup stays yours.
+          </p>
+        </template>
+        <HeadlessExample />
       </ExampleCard>
     </div>
   </section>
