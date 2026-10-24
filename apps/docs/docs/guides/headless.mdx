@@ -1,9 +1,11 @@
 ---
-title: Headless
+title: Headless composable
 description: Use the palette's state and ARIA wiring with your own markup.
 ---
 
-`useCommandPalette()` is the logic behind both components: the query, the ranked list, the selection, pages, scopes, recents and keyboard handling. It renders nothing. Reach for it when your design system already has an input and a list, or when the palette lives somewhere a dialog doesn't fit.
+Install `vue-cmdk-palette` first; see [Getting started](/getting-started).
+
+`useCommandPalette()` is the headless composable behind both components, and it is the logic behind both components: the query, the ranked list, the selection, pages, scopes, recents and keyboard handling. It renders nothing. Reach for it when your design system already has an input and a list, or when the palette lives somewhere a dialog doesn't fit.
 
 ```vue
 <script setup lang="ts">

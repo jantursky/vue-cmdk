@@ -14,6 +14,8 @@
 
 A small command palette for Vue 3 that works well from the keyboard and with screen readers.
 
+The npm package is `vue-cmdk-palette`. Other projects on npm and GitHub also use the name `vue-cmdk`; they are not this library.
+
 There are two ways to use it. `<CommandPaletteDialog>` is a ready-made modal. If you'd rather write your own markup, the headless `useCommandPalette()` composable gives you the state and the ARIA wiring and leaves the rendering to you.
 
 Arrow keys wrap, Enter runs the selected command, and ⌘/Ctrl+Enter runs its alternate action (opening a link in a new tab, for example). ⌘/Ctrl+1-9 picks a row directly, Tab switches scopes, Escape backs out one layer at a time, and Backspace on an empty field leaves a nested list.
