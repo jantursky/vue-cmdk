@@ -1,0 +1,52 @@
+name: IndexNow
+
+# After a docs change lands on main, tell IndexNow (Bing, Yandex and others)
+# about every page in the sitemap. The key is public by design: it is also the
+# name and content of the file served from the docs site root.
+on:
+  push:
+    branches: [main]
+    paths: ['apps/docs/**', '.github/workflows/indexnow.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SITE: https://vue-cmdk-docs.vercel.app
+  HOST: vue-cmdk-docs.vercel.app
+  INDEXNOW_KEY: 0db2ab6762b40f923d515ac1aa0c6d75
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait until the key file is live
+        # Vercel deploys the same push, so the key file appears once that deploy is live.
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE/$INDEXNOW_KEY.txt" || true)
+            if [ "$code" = "200" ] && [ "$(curl -s "$SITE/$INDEXNOW_KEY.txt" | tr -d '\r\n')" = "$INDEXNOW_KEY" ]; then
+              echo "Key file is live (attempt $attempt)"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Key file not live after 10 minutes" >&2
+          exit 1
+
+      - name: Submit the sitemap URLs
+        run: |
+          set -euo pipefail
+          curl -sf "$SITE/sitemap.xml" | grep -o '<loc>[^<]*</loc>' | sed -e 's/<[^>]*>//g' > urls.txt
+          test -s urls.txt || { echo "No URLs in the sitemap" >&2; exit 1; }
+          jq -Rn --arg host "$HOST" --arg key "$INDEXNOW_KEY" --arg loc "$SITE/$INDEXNOW_KEY.txt" \
+            '{host: $host, key: $key, keyLocation: $loc, urlList: [inputs | select(length > 0)]}' urls.txt > payload.json
+          echo "$(wc -l < urls.txt | tr -d ' ') URLs"
+          code=$(curl -s -o response.txt -w '%{http_code}' -X POST https://api.indexnow.org/indexnow \
+            -H 'Content-Type: application/json; charset=utf-8' --data @payload.json)
+          echo "IndexNow responded $code"
+          cat response.txt || true
+          # 200 and 202 mean accepted; anything else is a failure.
+          case "$code" in 200|202) ;; *) exit 1 ;; esac
