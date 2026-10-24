@@ -22,7 +22,7 @@ Arrow keys wrap, Enter runs the selected command, and ⌘/Ctrl+Enter runs its al
 
 The markup follows the WAI-ARIA combobox and listbox pattern. Focus stays inside the dialog while it's open and goes back where it was when it closes, and a live region announces the result count.
 
-There are no runtime dependencies (Vue is a peer dependency), and the bundle is about 10 kB minified and gzipped. Nothing is styled unless you ask for it: every part has a `data-cmdk-*` hook, and there's an optional theme built on CSS variables with light and dark modes.
+There are no runtime dependencies (Vue is a peer dependency), and the bundle is about 11 kB minified and gzipped. Nothing is styled unless you ask for it: every part has a `data-cmdk-*` hook, and there's an optional theme built on CSS variables with light and dark modes.
 
 ## Install
 

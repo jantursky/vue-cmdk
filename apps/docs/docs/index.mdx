@@ -17,7 +17,7 @@ There are two ways to use it. `<CommandPaletteDialog>` is a ready-made modal wit
 
 What's in it:
 
-- No runtime dependencies. Vue `^3.5` is a peer dependency, and the bundle is about 10 kB minified and gzipped.
+- No runtime dependencies. Vue `^3.5` is a peer dependency, and the bundle is about 11 kB minified and gzipped.
 - Plain substring search over labels, keywords and hints, with typographic quotes and dashes folded to their keyboard forms.
 - Nested pages, loaded synchronously or from a promise.
 - Scope chips with optional prefixes such as `>` for commands.
@@ -39,3 +39,25 @@ What's in it:
     Every prop, event, slot and composable option.
   </Card>
 </CardGroup>
+
+## FAQ
+
+### Does it need any other packages?
+
+No. The package has no runtime dependencies. Vue `^3.5` is a peer dependency, so your app supplies it.
+
+### Is it accessible?
+
+The markup follows the WAI-ARIA combobox and listbox pattern, focus returns to where it was when the dialog closes, and a live region announces the result count. The browser tests run an axe-core check in both themes.
+
+### Can I translate the text?
+
+Yes. Every built-in string is in `labels`. Pass any subset of them, and the rest keep the English defaults.
+
+### Does it work on the server?
+
+The package has a server-rendering test suite. Check your framework's setup in your own project before you ship.
+
+### Can I restyle it?
+
+Yes. The optional theme is built on `--cmdk-*` CSS variables, and every part has a `data-cmdk-*` attribute to target. You can also skip the theme and write every rule yourself.
