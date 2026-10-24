@@ -4,10 +4,13 @@
 
 Pages: [home](home.md) · [getting-started](getting-started.md) · [headless](headless.md) · [name-collision](name-collision.md)
 
-**Implemented (working tree, not committed):** ranks 1, 2, 4, 5, 7 (keyword part), 8. Build passes: `bun run build:docs`.
-**Rank 3 done on GitHub (approved):** homepage now the docs site, nine topics added. **Pending:** the npm description and keyword changes take effect only with a release.
-**Deferred, effort M or unverified:** 6 (FAQ and comparison section), 9 (JSON-LD SoftwareSourceCode: effect on engines unverified, so skip), 10, 11.
-**Not in the table:** sitemap lastmod and IndexNow from the baseline; they need a Blume config and deploy change.
+**Done in the repo (committed on `main`, release 1.2.1 on npm):** ranks 1, 2, 4, 5, 7 (keyword part), 8.
+**Done after the release (working tree, not committed):** rank 6 FAQ on the docs home, with five answers checked against the repo. Also corrected the bundle size from "about 10 kB" to "about 11 kB" (build: 11.42 kB min+gzip) on the docs home and the package README. The package README change reaches npm only with the next release.
+**Done on GitHub (approved):** rank 3, homepage now the docs site, nine topics added.
+**Investigated, not changed:** sitemap `lastmod`. Blume's `lastModified: "git"` setting did not produce a `sitemap.xml` in the local build, and the live sitemap comes from a path not visible in `apps/docs/dist`. Needs a look at how the deployed sitemap is generated before any change.
+**Done, working tree:** rank 10, a headless example in `apps/example` and on `/examples`. Rank 11, a Nuxt note on `/getting-started`, backed by a server-render check with Nuxt 4.6 and Vue 3.5. Hydration of the open dialog in Nuxt was not checked.
+**Done, working tree:** IndexNow. Key file in `apps/docs/public/`, workflow `.github/workflows/indexnow.yml` runs after pushes to `main` that touch the docs, waits for the key file to go live, then submits the sitemap URLs. It works only after the change is pushed and deployed.
+**Skipped:** rank 9, JSON-LD SoftwareSourceCode (effect on engines unverified). The comparison half of rank 6 (needs verified competitor claims).
 
 | Rank | Page             | Finding                                                                                                 | Class    | Effort | Why now                                                         |
 | ---- | ---------------- | ------------------------------------------------------------------------------------------------------- | -------- | ------ | --------------------------------------------------------------- |
