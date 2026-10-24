@@ -2,6 +2,12 @@
 
 All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-10-24
+
+### Changed
+
+- The package keywords include `headless`. The library code and the bundle are unchanged.
+
 ## [1.2.0] - 2026-10-23
 
 ### Added
@@ -56,6 +62,7 @@ The first version.
 - Replaceable labels for every built-in string.
 - An optional theme at `vue-cmdk-palette/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
 
+[1.2.1]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.2.1
 [1.2.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.2.0
 [1.1.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.1.0
 [1.0.1]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.0.1
