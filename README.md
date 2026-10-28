@@ -1,4 +1,6 @@
-<p align="center"><img src="apps/docs/public/icon.svg" alt="" width="72" height="72" /></p>
+<p align="center">
+  <img src=".github/assets/banner.svg" alt="Vue cmdk: accessible command palette for Vue 3" width="420">
+</p>
 
 # vue-cmdk
 
