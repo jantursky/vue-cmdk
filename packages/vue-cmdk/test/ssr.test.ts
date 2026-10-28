@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { createSSRApp, defineComponent, h, type Component } from 'vue'
 import { renderToString, type SSRContext } from 'vue/server-renderer'
 
-import { CommandPalette, CommandPaletteDialog, useCommandPalette } from '../src'
+import {
+  CommandPalette,
+  CommandPaletteDialog,
+  createCommandRegistry,
+  useCommandPalette,
+  useRegisterCommands,
+} from '../src'
 import { action, page } from './fixtures'
 
 // Nuxt and other SSR setups render on a server with no `window` or `document`.
@@ -56,5 +62,20 @@ describe('server rendering', () => {
     })
     const { html } = await render(Headless, {})
     expect(html).toContain('<li>Copy link</li>')
+  })
+
+  it('renders commands registered by a component with an installed registry', async () => {
+    const registry = createCommandRegistry()
+    const Registers = defineComponent(() => {
+      useRegisterCommands([action('save', 'Save draft')])
+      return () => h('div')
+    })
+    const App = defineComponent(() => () => h('div', [h(Registers), h(CommandPalette)]))
+    const app = createSSRApp(App)
+    app.use(registry)
+    const html = await renderToString(app)
+    expect(html).toContain('data-cmdk-root')
+    expect(registry.commands.value.map((c) => c.label)).toEqual(['Save draft'])
+    expect(html).toContain('Save draft')
   })
 })

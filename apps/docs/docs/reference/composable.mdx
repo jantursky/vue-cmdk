@@ -13,22 +13,23 @@ const palette = useCommandPalette({ commands, scopes, onSelect: (command) => con
 
 Options marked "ref or getter" accept a plain value, a `ref`, or a getter function, and stay reactive.
 
-| option        | type                                       | notes                                                              |
-| ------------- | ------------------------------------------ | ------------------------------------------------------------------ |
-| `commands`    | `Command[]`, ref or getter                 | Required.                                                          |
-| `scopes`      | `Scope[]`, ref or getter                   |                                                                    |
-| `groupOrder`  | `string[]`, ref or getter                  | Heading order for the empty query.                                 |
-| `maxResults`  | `number`, ref or getter                    | Default `40`.                                                      |
-| `filter`      | `FilterFn` or a ref of one                 | A getter isn't accepted here, since a filter is itself a function. |
-| `recents`     | `RecentsOptions \| boolean`, ref or getter | Default `true`.                                                    |
-| `quickSelect` | `boolean`, ref or getter                   | Default `true`.                                                    |
-| `labels`      | `Partial<PaletteLabels>`, ref or getter    |                                                                    |
-| `query`       | `Ref<string>`                              | Bring your own query state, for example from `defineModel`.        |
-| `navigate`    | `(href) => void`                           | Router hook for `link` commands.                                   |
-| `onSelect`    | `(command, mode) => void`                  |                                                                    |
-| `onError`     | `(error, command) => void`                 |                                                                    |
-| `onClose`     | `() => void`                               | Called when the palette asks to close.                             |
-| `onNoResults` | `(query, scope) => void`                   | A query matched nothing for 500 ms, or at close. Once per query.   |
+| option        | type                                       | notes                                                                |
+| ------------- | ------------------------------------------ | -------------------------------------------------------------------- |
+| `commands`    | `Command[]`, ref or getter                 | Default `[]`. Listed before the registry's commands.                 |
+| `registry`    | `CommandRegistry`                          | Commands contributed by mounted components, listed after `commands`. |
+| `scopes`      | `Scope[]`, ref or getter                   |                                                                      |
+| `groupOrder`  | `string[]`, ref or getter                  | Heading order for the empty query.                                   |
+| `maxResults`  | `number`, ref or getter                    | Default `40`.                                                        |
+| `filter`      | `FilterFn` or a ref of one                 | A getter isn't accepted here, since a filter is itself a function.   |
+| `recents`     | `RecentsOptions \| boolean`, ref or getter | Default `true`.                                                      |
+| `quickSelect` | `boolean`, ref or getter                   | Default `true`.                                                      |
+| `labels`      | `Partial<PaletteLabels>`, ref or getter    |                                                                      |
+| `query`       | `Ref<string>`                              | Bring your own query state, for example from `defineModel`.          |
+| `navigate`    | `(href) => void`                           | Router hook for `link` commands.                                     |
+| `onSelect`    | `(command, mode) => void`                  |                                                                      |
+| `onError`     | `(error, command) => void`                 |                                                                      |
+| `onClose`     | `() => void`                               | Called when the palette asks to close.                               |
+| `onNoResults` | `(query, scope) => void`                   | A query matched nothing for 500 ms, or at close. Once per query.     |
 
 ### State
 
@@ -75,10 +76,12 @@ Options marked "ref or getter" accept a plain value, a `ref`, or a getter functi
 
 These are what the components use internally, exported for headless builds.
 
-| composable                        | does                                                                                                                        |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `useRecents(options)`             | Loads, ranks and records recents. Returns `entries`, `enabled`, `record(id)`, `forget(id)`, `clear()`, `resolve(commands)`. |
-| `useHotkey(handler, options?)`    | A capture-phase `keydown` listener (on `document` unless `target` is set), removed on unmount.                              |
-| `useFocusTrap(container, active)` | Keeps Tab inside an element and restores focus when it deactivates.                                                         |
-| `useScrollLock(active)`           | Sets `overflow: hidden` on `body` while active and restores the old value.                                                  |
-| `useCommandPaletteContext()`      | In a component rendered inside a palette's slots, that palette's composable return. Throws outside one.                     |
+| composable                                        | does                                                                                                                        |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `useRegisterCommands(commands)`                   | Lists commands in the palette until the calling component or effect scope is disposed. Needs a registry in reach.           |
+| `useCommandShortcuts(commands, { run, enabled })` | Runs a command when its chord-string `shortcut` is pressed. What `bind-shortcuts` is built on.                              |
+| `useRecents(options)`                             | Loads, ranks and records recents. Returns `entries`, `enabled`, `record(id)`, `forget(id)`, `clear()`, `resolve(commands)`. |
+| `useHotkey(handler, options?)`                    | A capture-phase `keydown` listener (on `document` unless `target` is set), removed on unmount.                              |
+| `useFocusTrap(container, active)`                 | Keeps Tab inside an element and restores focus when it deactivates.                                                         |
+| `useScrollLock(active)`                           | Sets `overflow: hidden` on `body` while active and restores the old value.                                                  |
+| `useCommandPaletteContext()`                      | In a component rendered inside a palette's slots, that palette's composable return. Throws outside one.                     |

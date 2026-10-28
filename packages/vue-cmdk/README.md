@@ -103,6 +103,25 @@ Optional fields:
 
 Errors thrown or rejected by `perform` or by `children` are caught and emitted as `error`.
 
+### Registering commands from components
+
+A component can add commands while it is mounted. Install a registry once, then call `useRegisterCommands` (an array, ref or getter). The commands are removed when the component unmounts, and the palette lists them after its own `commands`.
+
+```ts
+import { createCommandRegistry, useRegisterCommands } from 'vue-cmdk-palette'
+
+app.use(createCommandRegistry())
+
+// In the editor component:
+useRegisterCommands(() => [{ kind: 'action', id: 'save', label: 'Save draft', perform: save }])
+```
+
+`provideCommandRegistry()` scopes a registry to a subtree, and `useCommandPalette({ registry })` takes one for headless palettes.
+
+### Shortcuts
+
+Set `bind-shortcuts` on `<CommandPaletteDialog>` and a command's chord-string `shortcut` (such as `'mod+shift+c'`) runs it from anywhere on the page while the dialog is closed. Array shortcuts stay display-only. The dialog's own `hotkey` wins any clash, a chord without ⌘/Ctrl is ignored while typing in a field, and disabled commands are skipped. `useCommandShortcuts(commands, { run, enabled })` does the same for headless palettes.
+
 ## Search
 
 The query matches as a plain substring anywhere in the label, keywords, or hint, ignoring case and accents. A query with several words matches when every word appears somewhere, in any order, so `file new` finds `New file`. There's no fuzzy matching, on purpose: fuzzy search returns something for every query, so a typo gets you a confident list of wrong answers. Ranking, best first:
@@ -209,44 +228,46 @@ The attribute getters (`fieldAttrs`, `listAttrs`, `rowAttrs`, `groupAttrs`, `chi
 
 `<CommandPalette>` renders the palette inline. `<CommandPaletteDialog>` accepts the same props and adds modal behavior.
 
-| prop            | default           |                                                            |
-| --------------- | ----------------- | ---------------------------------------------------------- |
-| `commands`      | required          |                                                            |
-| `scopes`        | `[]`              |                                                            |
-| `group-order`   | declaration order | Heading order for an empty query.                          |
-| `max-results`   | `40`              | The total number of rows drawn for a non-empty query.      |
-| `filter`        | built-in          |                                                            |
-| `recents`       | `true`            | `false`, `true`, or `RecentsOptions`.                      |
-| `quick-select`  | `true`            | ⌘/Ctrl+1-9.                                                |
-| `show-detail`   | `false`           | The band below the list that describes the selected row.   |
-| `labels`        | English           | Every built-in string. Pass any subset of `PaletteLabels`. |
-| `navigate`      | `location.href`   | A router hook for `link` commands.                         |
-| `chord`         | dialog: `hotkey`  | The chord printed in the footer.                           |
-| `autofocus`     | `true`            |                                                            |
-| `v-model:query` | `''`              |                                                            |
-| **dialog only** |                   |                                                            |
-| `v-model:open`  | `false`           |                                                            |
-| `hotkey`        | `'mod+k'`         | `false` disables the global chord.                         |
-| `open-on-slash` | `false`           | `/` opens the palette when focus is not in a field.        |
-| `dismissible`   | `true`            | A backdrop click closes the palette.                       |
-| `to`            | `'body'`          | The Teleport target.                                       |
-| `trap-focus`    | `true`            |                                                            |
+| prop             | default           |                                                              |
+| ---------------- | ----------------- | ------------------------------------------------------------ |
+| `commands`       | `[]`              | Listed before commands registered by components.             |
+| `scopes`         | `[]`              |                                                              |
+| `group-order`    | declaration order | Heading order for an empty query.                            |
+| `max-results`    | `40`              | The total number of rows drawn for a non-empty query.        |
+| `filter`         | built-in          |                                                              |
+| `recents`        | `true`            | `false`, `true`, or `RecentsOptions`.                        |
+| `quick-select`   | `true`            | ⌘/Ctrl+1-9.                                                  |
+| `show-detail`    | `false`           | The band below the list that describes the selected row.     |
+| `labels`         | English           | Every built-in string. Pass any subset of `PaletteLabels`.   |
+| `navigate`       | `location.href`   | A router hook for `link` commands.                           |
+| `chord`          | dialog: `hotkey`  | The chord printed in the footer.                             |
+| `autofocus`      | `true`            |                                                              |
+| `v-model:query`  | `''`              |                                                              |
+| **dialog only**  |                   |                                                              |
+| `v-model:open`   | `false`           |                                                              |
+| `hotkey`         | `'mod+k'`         | `false` disables the global chord.                           |
+| `open-on-slash`  | `false`           | `/` opens the palette when focus is not in a field.          |
+| `dismissible`    | `true`            | A backdrop click closes the palette.                         |
+| `to`             | `'body'`          | The Teleport target.                                         |
+| `trap-focus`     | `true`            |                                                              |
+| `bind-shortcuts` | `false`           | Run a command from its chord-string `shortcut` while closed. |
 
 Events: `select(command, mode)`, `error(error, command)`, `close()` (inline only), `no-results(query, scope)`, `update:open`, `update:query`. `no-results` fires once for a query that matched nothing and stayed unchanged for 500 ms, so you can send it straight to analytics.
 
 ## Keyboard
 
-| key                 | action                                                             |
-| ------------------- | ------------------------------------------------------------------ |
-| ⌘K / Ctrl+K         | Open or close the palette (dialog).                                |
-| ↑ ↓, Home End       | Move the selection. It wraps and skips disabled rows.              |
-| ↵                   | Activate the selected row.                                         |
-| ⌘↵ / Ctrl+↵         | Alternate activation, for example opening a link in a new tab.     |
-| ⌘1-9 / Ctrl+1-9     | Activate the row at that position. Add ⇧ for alternate activation. |
-| ⇥ / ⇧⇥              | Next or previous scope.                                            |
-| ⌫ on an empty field | Go back one page.                                                  |
-| ⇧⌦ / ⇧⌫ on a Mac    | Remove the selected row from recents, in the Recent group only.    |
-| Esc                 | Clear the query, then go back one page, then close.                |
+| key                 | action                                                              |
+| ------------------- | ------------------------------------------------------------------- |
+| ⌘K / Ctrl+K         | Open or close the palette (dialog).                                 |
+| ↑ ↓, Home End       | Move the selection. It wraps and skips disabled rows.               |
+| ↵                   | Activate the selected row.                                          |
+| ⌘↵ / Ctrl+↵         | Alternate activation, for example opening a link in a new tab.      |
+| ⌘1-9 / Ctrl+1-9     | Activate the row at that position. Add ⇧ for alternate activation.  |
+| ⇥ / ⇧⇥              | Next or previous scope.                                             |
+| ⌫ on an empty field | Go back one page.                                                   |
+| ⇧⌦ / ⇧⌫ on a Mac    | Remove the selected row from recents, in the Recent group only.     |
+| Esc                 | Clear the query, then go back one page, then close.                 |
+| A command's chord   | With `bind-shortcuts`, run that command while the dialog is closed. |
 
 Change the dialog's shortcut with `hotkey`, for example `hotkey="mod+shift+p"` or `hotkey="alt+space"`. Modifiers are `mod` (⌘ on a Mac, Ctrl elsewhere), `ctrl`, `meta`, `alt` and `shift`, and they must match exactly. Shortcuts with ⌥ work on a Mac too, even though ⌥ changes the character a key types there. For several shortcuts at once, set `:hotkey="false"` and call `useHotkey` with `parseChord` and `matchesChord`. To open the palette from code, set `v-model:open`, or call `show()`, `hide()` or `toggle()` on a template ref.
 

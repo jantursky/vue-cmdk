@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { computed, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, useTemplateRef, watch } from 'vue'
 
+import { useCommandShortcuts } from '../composables/useCommandShortcuts'
 import { useFocusTrap } from '../composables/useFocusTrap'
 import { useHotkey } from '../composables/useHotkey'
 import { editStoredRecents, recentsOptionsOf } from '../composables/useRecents'
 import { useScrollLock } from '../composables/useScrollLock'
-import { isEditableTarget, matchesChord, parseChord } from '../core/keys'
+import { followLink } from '../core/activate'
+import { isDev } from '../core/dev'
+import { chordId, isEditableTarget, matchesChord, parseChord } from '../core/keys'
 import { DEFAULT_LABELS } from '../core/labels'
 import { forgetRecent } from '../core/recents'
+import type { Command } from '../core/types'
+import { COMMAND_REGISTRY_KEY } from '../registry'
 import CommandPalette from './CommandPalette.vue'
 import {
   PALETTE_DEFAULTS,
@@ -29,6 +34,7 @@ const props = withDefaults(defineProps<CommandPaletteDialogProps>(), {
   dismissible: true,
   to: 'body',
   trapFocus: true,
+  bindShortcuts: false,
 })
 const emit = defineEmits<CommandPaletteEmits>()
 defineSlots<CommandPaletteSlots>()
@@ -40,6 +46,7 @@ const query = defineModel<string>('query', { default: '' })
 const panel = useTemplateRef<HTMLElement>('panel')
 const palette = useTemplateRef<{
   focus: () => void
+  activate: (command: Command) => Promise<void>
   forgetRecent: (id: string) => void
   clearRecents: () => void
 }>('palette')
@@ -97,6 +104,55 @@ useHotkey((event) => {
     open.value = true
   }
 })
+
+// The same list the open palette shows: own commands, then the registry's.
+const registry = inject(COMMAND_REGISTRY_KEY, null)
+const shortcutCommands = computed<readonly Command[]>(() => [
+  ...(props.commands ?? []),
+  ...(registry?.commands.value ?? []),
+])
+
+/**
+ * Runs a command from its shortcut while the dialog is closed, as the palette would
+ * on Enter. Recents are not touched: a shortcut means the user already knows the command.
+ */
+const runShortcut = async (command: Command): Promise<void> => {
+  if (command.kind === 'page') {
+    open.value = true
+    await nextTick()
+    await palette.value?.activate(command)
+    return
+  }
+  emit('select', command, 'primary')
+  try {
+    if (command.kind === 'link') followLink(command.href, 'primary', props.navigate)
+    else await command.perform({ command, mode: 'primary', close: () => (open.value = false) })
+  } catch (error) {
+    emit('error', error, command)
+  }
+}
+
+// Registered after the hotkey above, which claims its event first and so wins any clash.
+useCommandShortcuts(shortcutCommands, {
+  run: (command) => void runShortcut(command),
+  enabled: () => props.bindShortcuts && !open.value,
+})
+
+if (isDev()) {
+  watch(
+    () => [props.bindShortcuts, chord.value, shortcutCommands.value] as const,
+    ([bound, own, commands]) => {
+      if (!bound || own === null) return
+      for (const command of commands) {
+        if (typeof command.shortcut === 'string' && chordId(parseChord(command.shortcut)) === chordId(own))
+          console.warn(
+            `[vue-cmdk] Command "${command.id}" uses the shortcut "${command.shortcut}", which is the dialog's hotkey. The hotkey wins.`,
+          )
+      }
+    },
+    { immediate: true },
+  )
+}
 
 const onBackdrop = (): void => {
   if (props.dismissible) open.value = false

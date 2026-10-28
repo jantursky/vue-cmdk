@@ -9,6 +9,7 @@ import { useHotkey } from '../../src/composables/useHotkey'
 import { useScrollLock } from '../../src/composables/useScrollLock'
 import { isApplePlatform } from '../../src/core/keys'
 import type { RecentEntry, RecentsAdapter } from '../../src/core/types'
+import { createCommandRegistry } from '../../src/registry'
 import { action, page } from '../fixtures'
 
 const wrappers: VueWrapper[] = []
@@ -355,5 +356,149 @@ describe('useScrollLock', () => {
     expect(document.body.style.overflow).toBe('hidden')
     wrapper.unmount()
     expect(document.body.style.overflow).toBe('auto')
+  })
+})
+
+describe('bound shortcuts', () => {
+  const chord = (extra: KeyboardEventInit = {}): KeyboardEventInit => ({ key: 'C', shiftKey: true, ...mod(), ...extra })
+
+  it('does nothing while bindShortcuts is off', async () => {
+    const perform = vi.fn()
+    render({ commands: [action('copy', 'Copy link', { shortcut: 'mod+shift+c', perform })] })
+    const event = press(chord())
+    await flush()
+    expect(perform).not.toHaveBeenCalled()
+    expect(event.defaultPrevented).toBe(false)
+  })
+
+  it('runs an action by its shortcut, emits select and stays closed', async () => {
+    const perform = vi.fn()
+    const copy = action('copy', 'Copy link', { shortcut: 'mod+shift+c', perform })
+    const wrapper = render({ commands: [copy], bindShortcuts: true })
+    const event = press(chord())
+    await flush()
+    expect(event.defaultPrevented).toBe(true)
+    expect(perform).toHaveBeenCalledWith(expect.objectContaining({ command: copy, mode: 'primary' }))
+    expect(wrapper.emitted('select')?.[0]).toEqual([copy, 'primary'])
+    expect(dialog()).toBeNull()
+  })
+
+  it('does not bind an array shortcut', async () => {
+    const perform = vi.fn()
+    render({ commands: [action('w', 'Close tab', { shortcut: ['⌥', 'W'], perform })], bindShortcuts: true })
+    press({ key: 'w', altKey: true })
+    await flush()
+    expect(perform).not.toHaveBeenCalled()
+  })
+
+  it('follows a link through navigate', async () => {
+    const navigate = vi.fn()
+    render({
+      commands: [{ kind: 'link', id: 'docs', label: 'Docs', href: '/docs', shortcut: 'mod+shift+d' }],
+      bindShortcuts: true,
+      navigate,
+    })
+    press({ key: 'D', shiftKey: true, ...mod() })
+    await flush()
+    expect(navigate).toHaveBeenCalledWith('/docs')
+  })
+
+  it('opens the dialog on the page of a page command', async () => {
+    const wrapper = render({
+      commands: [page('lang', 'Switch language', [action('en', 'English')], { shortcut: 'mod+shift+l' })],
+      bindShortcuts: true,
+    })
+    press({ key: 'L', shiftKey: true, ...mod() })
+    await flush()
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([true])
+    expect(dialog()?.textContent).toContain('English')
+    expect(dialog()?.textContent).not.toContain('Switch language…')
+  })
+
+  it('emits error when the handler throws', async () => {
+    const boom = new Error('boom')
+    const failing = action('f', 'Fail', {
+      shortcut: 'mod+shift+f',
+      perform: () => {
+        throw boom
+      },
+    })
+    const wrapper = render({ commands: [failing], bindShortcuts: true })
+    press({ key: 'F', shiftKey: true, ...mod() })
+    await flush()
+    expect(wrapper.emitted('error')?.[0]).toEqual([boom, failing])
+  })
+
+  it('does not record the run in recents', async () => {
+    localStorage.clear()
+    render({ commands: [action('copy', 'Copy link', { shortcut: 'mod+shift+c' })], bindShortcuts: true, recents: true })
+    press(chord())
+    await flush()
+    expect(localStorage.length).toBe(0)
+  })
+
+  it('stays quiet while the dialog is open', async () => {
+    const perform = vi.fn()
+    render({
+      commands: [action('copy', 'Copy link', { shortcut: 'mod+shift+c', perform })],
+      bindShortcuts: true,
+      open: true,
+    })
+    await nextTick()
+    press(chord())
+    await flush()
+    expect(perform).not.toHaveBeenCalled()
+  })
+
+  it('skips a plain chord in a text field and a disabled command', async () => {
+    const plain = vi.fn()
+    const off = vi.fn()
+    render({
+      commands: [
+        action('n', 'New', { shortcut: 'shift+n', perform: plain }),
+        action('d', 'Disabled', { shortcut: 'mod+shift+d', disabled: true, perform: off }),
+      ],
+      bindShortcuts: true,
+    })
+    const field = document.createElement('input')
+    document.body.append(field)
+    press({ key: 'N', shiftKey: true }, field)
+    const blocked = press({ key: 'D', shiftKey: true, ...mod() })
+    await flush()
+    expect(plain).not.toHaveBeenCalled()
+    expect(off).not.toHaveBeenCalled()
+    expect(blocked.defaultPrevented).toBe(false)
+  })
+
+  it('binds commands from the registry', async () => {
+    const perform = vi.fn()
+    const registry = createCommandRegistry()
+    registry.register([action('save', 'Save draft', { shortcut: 'mod+s', perform })])
+    const wrapper = mount(CommandPaletteDialog, {
+      props: { recents: false, bindShortcuts: true },
+      global: { plugins: [registry] },
+      attachTo: document.body,
+    })
+    wrappers.push(wrapper)
+    press({ key: 's', ...mod() })
+    await flush()
+    expect(perform).toHaveBeenCalledTimes(1)
+  })
+
+  it('lets the hotkey win over a command chord and warns about the clash', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const perform = vi.fn()
+    const wrapper = render({
+      commands: [action('clash', 'Clash', { shortcut: 'mod+k', perform })],
+      bindShortcuts: true,
+    })
+    expect(warn.mock.calls.some(([message]) => String(message).includes('hotkey'))).toBe(true)
+    press({ key: 'k', ...mod() })
+    await flush()
+    expect(perform).not.toHaveBeenCalled()
+    expect(wrapper.emitted('update:open')?.[0]).toEqual([true])
+    press({ key: 'k', ...mod() })
+    await flush()
+    expect(perform).not.toHaveBeenCalled()
   })
 })

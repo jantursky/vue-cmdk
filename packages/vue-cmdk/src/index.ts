@@ -17,10 +17,12 @@ export {
   type UseCommandPaletteReturn,
 } from './composables/useCommandPalette'
 export { useRecents, type RecentsOptions, type UseRecentsReturn } from './composables/useRecents'
+export { useCommandShortcuts, type UseCommandShortcutsOptions } from './composables/useCommandShortcuts'
 export { useHotkey, type UseHotkeyOptions } from './composables/useHotkey'
 export { useFocusTrap, type UseFocusTrapReturn } from './composables/useFocusTrap'
 export { useScrollLock } from './composables/useScrollLock'
 export { COMMAND_PALETTE_KEY, useCommandPaletteContext } from './context'
+export { createCommandRegistry, provideCommandRegistry, useRegisterCommands, type CommandRegistry } from './registry'
 
 export { buildList, MAX_RESULTS, type BuildListInput } from './core/list'
 export { matchQuery, rankMatch } from './core/match'

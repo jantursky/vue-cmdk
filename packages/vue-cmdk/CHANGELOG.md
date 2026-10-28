@@ -2,6 +2,20 @@
 
 All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-10-28
+
+### Added
+
+- `createCommandRegistry()`, `provideCommandRegistry()` and `useRegisterCommands()`: components add commands to the palette while they are mounted, and the commands are removed when the component unmounts. A palette lists its own `commands` first, then the registered ones.
+- A `registry` option on `useCommandPalette`, for headless palettes.
+- A `bindShortcuts` prop on `<CommandPaletteDialog>`: while the dialog is closed, a command's chord-string `shortcut` (such as `'mod+shift+c'`) runs that command. Array shortcuts stay display-only.
+- `useCommandShortcuts(commands, { run, enabled })`, the same binding for headless and inline palettes.
+- Development warnings for two commands bound to one chord, and for a command chord equal to the dialog's `hotkey`, which always wins.
+
+### Changed
+
+- The `commands` prop and option are optional and default to an empty list.
+
 ## [1.2.2] - 2026-10-24
 
 ### Fixed
@@ -68,6 +82,7 @@ The first version.
 - Replaceable labels for every built-in string.
 - An optional theme at `vue-cmdk-palette/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
 
+[1.3.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.3.0
 [1.2.2]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.2.2
 [1.2.1]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.2.1
 [1.2.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.2.0

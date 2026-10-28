@@ -66,6 +66,10 @@ export const parseChord = (chord: string, apple = isApplePlatform()): Chord => {
   }
 }
 
+/** A string equal for chords that need the same keys, for spotting two bindings on one chord. */
+export const chordId = (chord: Chord): string =>
+  [chord.meta, chord.ctrl, chord.alt, chord.shift].map(Number).join('') + chord.key
+
 /** `KeyboardEvent.code` for a letter or digit key, or undefined for anything else. */
 const physicalCode = (key: string): string | undefined => {
   if (/^[a-z]$/.test(key)) return `Key${key.toUpperCase()}`
@@ -142,3 +146,27 @@ export const isEditableTarget = (target: EventTarget | null): boolean => {
   const tag = target.tagName
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target.isContentEditable
 }
+
+const NAMED_KEYS: ReadonlySet<string> = new Set([
+  'enter',
+  'escape',
+  'backspace',
+  'delete',
+  'tab',
+  ' ',
+  'home',
+  'end',
+  'pageup',
+  'pagedown',
+  'arrowup',
+  'arrowdown',
+  'arrowleft',
+  'arrowright',
+  ...Array.from({ length: 12 }, (_, index) => `f${index + 1}`),
+])
+
+/**
+ * Whether a keyboard can send the chord's key. A glyph string such as `⌘K` parses to the
+ * key `⌘k`, which nothing sends, so it is display-only rather than a dead binding.
+ */
+export const isBindableKey = (chord: Chord): boolean => chord.key.length === 1 || NAMED_KEYS.has(chord.key)

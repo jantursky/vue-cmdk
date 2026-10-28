@@ -1,0 +1,88 @@
+---
+title: Registry and shortcuts
+description: Let components contribute their own commands, and run a command from its shortcut while the palette is closed.
+---
+
+## A registry for screen-level commands
+
+Some commands only make sense while a screen is showing: "Save draft" in the editor, "Export table" on the reports page. A command registry lets that screen add them while it is mounted, so there is no global list to keep in sync.
+
+Install a registry once, next to the app:
+
+```ts
+import { createApp } from 'vue'
+import { createCommandRegistry } from 'vue-cmdk-palette'
+
+createApp(App).use(createCommandRegistry()).mount('#app')
+```
+
+Then register commands from any component. They are listed while the component is mounted and removed when it unmounts:
+
+```vue
+<script setup lang="ts">
+import { useRegisterCommands } from 'vue-cmdk-palette'
+
+const dirty = ref(false)
+
+// An array, a ref or a getter. A getter is read again whenever what it uses changes.
+useRegisterCommands(() => [
+  { kind: 'action', id: 'save-draft', label: 'Save draft', shortcut: 'mod+s', perform: save },
+  ...(dirty.value ? [{ kind: 'action' as const, id: 'discard', label: 'Discard changes', perform: discard }] : []),
+])
+</script>
+```
+
+A palette lists its own `commands` first, then the registered ones in registration order. They take part in search, scopes, groups and recents like any other root command, and a recent whose component is gone is skipped. With a registry in reach, the `commands` prop can be left out.
+
+### Scoping a registry to a subtree
+
+`provideCommandRegistry()` provides a registry to the calling component's subtree instead of the whole app, and returns it:
+
+```ts
+const registry = provideCommandRegistry()
+```
+
+Each registry is independent. Two apps on one page, or two server-rendered requests, never see each other's commands.
+
+For a headless palette, pass the registry to `useCommandPalette({ registry })`.
+
+`useRegisterCommands` with no registry in reach does nothing. In development it logs a warning that names the missing registry.
+
+## Shortcuts that run commands
+
+A command's `shortcut` is printed on its row. Set `bind-shortcuts` on `<CommandPaletteDialog>` and a string shortcut also runs the command from anywhere on the page, while the dialog is closed:
+
+```vue
+<CommandPaletteDialog :commands="commands" bind-shortcuts />
+```
+
+```ts
+{ kind: 'action', id: 'copy-link', label: 'Copy link', shortcut: 'mod+shift+c', perform: copyLink }
+```
+
+- Only chord strings are bound. `['⌥', 'W']` and glyph strings such as `'⌘K'` stay display-only.
+- Root commands are bound, registered ones included. Children of a page command are not.
+- The command runs in `primary` mode. Actions call `perform`, links navigate, and a page command opens the dialog on that page. `select` and `error` are emitted as usual.
+- Shortcut runs are not added to recents.
+- While the dialog is open the shortcuts are off, and keys keep their palette meaning.
+- A chord without ⌘/Ctrl is ignored while focus is in an input, textarea, select or contenteditable element. A chord with ⌘/Ctrl still runs.
+- A disabled command doesn't run, and its chord is left alone for the browser.
+
+### Conflicts
+
+The dialog's own `hotkey` always wins over a command chord. When two commands share a chord, the first in list order runs. In development both cases log a warning that names the chord and the commands.
+
+### Headless and inline palettes
+
+`<CommandPalette>` doesn't bind shortcuts, since an inline palette is usually part of a page with its own key handling. `useCommandShortcuts` does the same binding for your own markup:
+
+```ts
+import { useCommandShortcuts } from 'vue-cmdk-palette'
+
+useCommandShortcuts(commands, {
+  run: (command) => palette.activate(command),
+  enabled: () => !isOpen.value,
+})
+```
+
+It follows the same matching, editable-field and disabled rules as the dialog.

@@ -6,6 +6,7 @@ export default defineMeta({
   pages: [
     'opening-the-palette',
     'commands',
+    'registry-and-shortcuts',
     'nested-pages',
     'search',
     'scopes',

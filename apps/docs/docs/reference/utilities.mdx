@@ -35,10 +35,17 @@ The palette's rules live in plain functions with no Vue or DOM dependency. They'
 | `createLocalStorageAdapter(options?)` | The default adapter, with your own `key` or `namespace`. |
 | `RECENTS_STORAGE_KEY`                 | `'vue-cmdk:recents'`.                                    |
 
+## Registry
+
+| export                              | does                                                                                           |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `createCommandRegistry()`           | A registry. Install it with `app.use(registry)`; read its `commands`, call `register(source)`. |
+| `provideCommandRegistry(registry?)` | Provides a registry (a new one by default) to the calling component's subtree.                 |
+
 ## Other
 
 `DEFAULT_LABELS`, `COMMAND_PALETTE_KEY` (the injection key behind `useCommandPaletteContext`), and the `CommandHighlight` component, which draws highlight segments as text and `<mark>` elements.
 
 ## Types
 
-`Command`, `ActionCommand`, `LinkCommand`, `PageCommand`, `CommandContext`, `CommandIcon`, `ActivationMode`, `Scope`, `ScopeChoice`, `FilterFn`, `PaletteLabels`, `PaletteList`, `RankedGroup`, `RankedRow`, `RecentEntry`, `RecentsAdapter`, `RecentsOptions`, `Awaitable`, `Chord`, plus the props, emits and return types of each component and composable.
+`Command`, `ActionCommand`, `LinkCommand`, `PageCommand`, `CommandContext`, `CommandIcon`, `ActivationMode`, `Scope`, `ScopeChoice`, `FilterFn`, `PaletteLabels`, `PaletteList`, `RankedGroup`, `RankedRow`, `RecentEntry`, `RecentsAdapter`, `RecentsOptions`, `Awaitable`, `Chord`, `CommandRegistry`, `UseCommandShortcutsOptions`, plus the props, emits and return types of each component and composable.

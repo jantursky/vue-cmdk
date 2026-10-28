@@ -814,3 +814,11 @@ h3 {
 .footer a:hover {
   color: var(--page-accent);
 }
+
+.editor-panel {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border: 1px dashed var(--page-border, currentColor);
+  border-radius: 10px;
+  font-size: 14px;
+}

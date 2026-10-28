@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, provide, toRef, useTemplateRef, watch } from 'vue'
+import { computed, inject, nextTick, onMounted, provide, toRef, useTemplateRef, watch } from 'vue'
 
 import { useCommandPalette } from '../composables/useCommandPalette'
 import { COMMAND_PALETTE_KEY } from '../context'
 import { isApplePlatform } from '../core/keys'
 import type { RankedRow } from '../core/types'
+import { COMMAND_REGISTRY_KEY } from '../registry'
 import PaletteBreadcrumb from './parts/PaletteBreadcrumb.vue'
 import PaletteDetail from './parts/PaletteDetail.vue'
 import PaletteFooter from './parts/PaletteFooter.vue'
@@ -22,6 +23,7 @@ const query = defineModel<string>('query', { default: '' })
 
 const palette = useCommandPalette({
   commands: () => props.commands,
+  registry: inject(COMMAND_REGISTRY_KEY, null),
   scopes: () => props.scopes,
   groupOrder: () => props.groupOrder,
   maxResults: () => props.maxResults,

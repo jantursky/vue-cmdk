@@ -48,7 +48,9 @@ const commands: Command[] = [
 | `placeholder`    | `page` commands only: the field placeholder while the page is open.                   |
 | `meta`           | Free-form data for your own slots. The palette never reads it.                        |
 
-`shortcut` is display only. The palette prints the caps, but binding the key is up to your app.
+The palette always prints a `shortcut`. With `bind-shortcuts` on the dialog, a chord string such as `'mod+shift+c'` also runs the command while the palette is closed. See [Registry and shortcuts](/guides/registry-and-shortcuts).
+
+Commands can also come from components that are mounted right now, through a registry. See the same guide.
 
 ## The perform context
 

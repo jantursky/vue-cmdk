@@ -16,6 +16,8 @@ import {
   type ShallowRef,
 } from 'vue'
 
+import { followLink } from '../core/activate'
+import { isDev } from '../core/dev'
 import { isApplePlatform, isModOnly } from '../core/keys'
 import { DEFAULT_LABELS, fillLabel, resultsLabel } from '../core/labels'
 import { buildList } from '../core/list'
@@ -32,6 +34,7 @@ import type {
   RankedRow,
   Scope,
 } from '../core/types'
+import type { CommandRegistry } from '../registry'
 import { recentsOptionsOf, useRecents, type RecentsOptions } from './useRecents'
 
 export interface OpenPage {
@@ -40,7 +43,10 @@ export interface OpenPage {
 }
 
 export interface UseCommandPaletteOptions {
-  readonly commands: MaybeRefOrGetter<readonly Command[]>
+  /** The palette's own commands, listed before the registry's. Default none. */
+  readonly commands?: MaybeRefOrGetter<readonly Command[] | undefined>
+  /** Commands contributed by mounted components, listed after `commands`. */
+  readonly registry?: CommandRegistry | null
   readonly scopes?: MaybeRefOrGetter<readonly Scope[] | undefined>
   /** Heading order for the empty query. */
   readonly groupOrder?: MaybeRefOrGetter<readonly string[] | undefined>
@@ -137,10 +143,6 @@ let fallbackId = 0
 /** How long a query that matches nothing must stay unchanged before it is reported. */
 const NO_RESULTS_DELAY = 500
 
-// `process.env.NODE_ENV` on purpose: the consumer's bundler replaces it, while
-// `import.meta.env.DEV` would be frozen at the library's own build time.
-const isDev = (): boolean => typeof process !== 'undefined' && process.env.NODE_ENV !== 'production'
-
 const warnDuplicateIds = (commands: readonly Command[]): void => {
   const seen = new Set<string>()
   const reported = new Set<string>()
@@ -170,9 +172,16 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
 
   const recents = useRecents(() => recentsOptionsOf(toValue(options.recents)))
 
+  // Own commands first, then those registered by mounted components.
+  const rootCommands = computed<readonly Command[]>(() => {
+    const own = toValue(options.commands) ?? []
+    const registered = options.registry?.commands.value ?? []
+    return registered.length === 0 ? own : [...own, ...registered]
+  })
+
   if (isDev()) {
     watch(
-      () => [toValue(options.commands), pages.value] as const,
+      () => [rootCommands.value, pages.value] as const,
       ([commands, open]) => {
         warnDuplicateIds(commands)
         for (const page of open) warnDuplicateIds(page.items)
@@ -188,7 +197,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
 
   const list = computed<PaletteList>(() => {
     const page = currentPage.value
-    const commands = page?.items ?? toValue(options.commands)
+    const commands = page?.items ?? rootCommands.value
     return buildList({
       commands,
       query: query.value,
@@ -314,15 +323,6 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
     query.value = ''
   }
 
-  const followLink = (href: string, mode: ActivationMode): void => {
-    if (mode === 'alternate') {
-      window.open(href, '_blank', 'noopener,noreferrer')
-      return
-    }
-    if (options.navigate !== undefined) options.navigate(href)
-    else window.location.href = href
-  }
-
   const activate = async (target: RankedRow | Command | undefined, mode: ActivationMode = 'primary'): Promise<void> => {
     const command = target !== undefined && 'command' in target ? target.command : target
     if (command === undefined || disabledReason(command) !== null) return
@@ -334,7 +334,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
     if (command.keepOpen !== true) close()
 
     try {
-      if (command.kind === 'link') followLink(command.href, mode)
+      if (command.kind === 'link') followLink(command.href, mode, options.navigate)
       else await command.perform({ command, mode, close })
     } catch (error) {
       options.onError?.(error, command)

@@ -6,6 +6,7 @@ import { commands, groupOrder, scopes } from './commands'
 import CustomItemDemo from './demos/CustomItemDemo.vue'
 import HeadlessDemo from './demos/HeadlessDemo.vue'
 import InlineDemo from './demos/InlineDemo.vue'
+import RegistryDemo from './demos/RegistryDemo.vue'
 import ExamplesSection from './examples/ExamplesSection.vue'
 import { app, logAction, logNoResults, type ThemeChoice } from './state'
 
@@ -66,6 +67,7 @@ const KEYS: [string, string][] = [
   ['↵', 'run or open the selected command'],
   [formatChord('mod+enter'), 'open a page in a new tab'],
   [`${formatChord('mod+1')}…9`, 'pick one of the first nine rows'],
+  [formatChord('mod+shift+c'), 'copy the URL, even with the palette closed'],
   ['⇥  ⇧⇥', 'switch scope chips'],
   ['>', 'type first to list only Run commands'],
   ['⌫', 'go back from a nested list'],
@@ -177,6 +179,7 @@ const KEYS: [string, string][] = [
 
       <CustomItemDemo />
       <HeadlessDemo />
+      <RegistryDemo />
     </main>
 
     <ExamplesSection />
@@ -200,6 +203,7 @@ const KEYS: [string, string][] = [
       :recents="{ key: 'vue-cmdk-demo:recents' }"
       show-detail
       open-on-slash
+      bind-shortcuts
       @select="(command, mode) => logAction(`${mode === 'alternate' ? 'Alt-' : ''}picked ${command.label}`)"
       @error="onError"
       @no-results="logNoResults"

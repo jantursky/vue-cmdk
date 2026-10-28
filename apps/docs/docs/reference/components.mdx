@@ -9,7 +9,7 @@ description: Props, events, slots and labels for CommandPalette and CommandPalet
 
 | prop            | default           |                                                            |
 | --------------- | ----------------- | ---------------------------------------------------------- |
-| `commands`      | required          | The root list. See [Commands](/guides/commands).           |
+| `commands`      | `[]`              | The root list. See [Commands](/guides/commands).           |
 | `scopes`        | `[]`              | See [Scopes](/guides/scopes).                              |
 | `group-order`   | declaration order | Heading order for an empty query.                          |
 | `max-results`   | `40`              | The total number of rows drawn for a non-empty query.      |
@@ -25,14 +25,15 @@ description: Props, events, slots and labels for CommandPalette and CommandPalet
 
 ### Dialog only
 
-| prop            | default   |                                                     |
-| --------------- | --------- | --------------------------------------------------- |
-| `v-model:open`  | `false`   | Whether the dialog is open.                         |
-| `hotkey`        | `'mod+k'` | `false` disables the global chord.                  |
-| `open-on-slash` | `false`   | `/` opens the palette when focus is not in a field. |
-| `dismissible`   | `true`    | A backdrop click closes the palette.                |
-| `to`            | `'body'`  | The Teleport target, a selector or an element.      |
-| `trap-focus`    | `true`    | Keep Tab inside the dialog while it's open.         |
+| prop             | default   |                                                                                                                                          |
+| ---------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `v-model:open`   | `false`   | Whether the dialog is open.                                                                                                              |
+| `hotkey`         | `'mod+k'` | `false` disables the global chord.                                                                                                       |
+| `open-on-slash`  | `false`   | `/` opens the palette when focus is not in a field.                                                                                      |
+| `dismissible`    | `true`    | A backdrop click closes the palette.                                                                                                     |
+| `to`             | `'body'`  | The Teleport target, a selector or an element.                                                                                           |
+| `trap-focus`     | `true`    | Keep Tab inside the dialog while it's open.                                                                                              |
+| `bind-shortcuts` | `false`   | Run a command from its chord-string `shortcut` while the dialog is closed. See [Registry and shortcuts](/guides/registry-and-shortcuts). |
 
 ## Events
 

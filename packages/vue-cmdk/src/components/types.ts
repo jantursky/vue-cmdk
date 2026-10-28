@@ -12,7 +12,8 @@ import type {
 } from '../core/types'
 
 export interface CommandPaletteProps {
-  commands: readonly Command[]
+  /** Listed before commands registered by components. Default none. */
+  commands?: readonly Command[]
   scopes?: readonly Scope[]
   /** Heading order for the empty query. */
   groupOrder?: readonly string[]
@@ -46,6 +47,8 @@ export interface CommandPaletteDialogProps extends CommandPaletteProps {
   to?: string | HTMLElement
   /** Keep Tab inside the dialog. Default true. */
   trapFocus?: boolean
+  /** Run a command from its chord-string `shortcut` while the dialog is closed. Default false. */
+  bindShortcuts?: boolean
 }
 
 export interface CommandPaletteEmits {
