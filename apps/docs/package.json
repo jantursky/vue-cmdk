@@ -15,7 +15,7 @@
     "sync:changelog": "mkdir -p docs/_generated && sed 1,2d ../../packages/vue-cmdk/CHANGELOG.md > docs/_generated/changelog.md"
   },
   "dependencies": {
-    "@astrojs/vue": "^7.1.1",
+    "@astrojs/vue": "^7.1.2",
     "blume": "^2.2.4",
     "vue": "^3.5.0",
     "vue-cmdk-palette": "workspace:*"
