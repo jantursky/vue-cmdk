@@ -25,7 +25,8 @@ export interface UseRecentsReturn {
   readonly forget: (id: string) => void
   /** Removes every entry of the current namespace. */
   readonly clear: () => void
-  readonly resolve: (commands: readonly Command[]) => Command[]
+  /** The commands to show, best first. `exclude` ids are skipped and replaced by the next entries. */
+  readonly resolve: (commands: readonly Command[], exclude?: ReadonlySet<string>) => Command[]
 }
 
 type Operation = { op: 'record'; id: string; at: number } | { op: 'forget'; id: string } | { op: 'clear' }
@@ -152,10 +153,10 @@ export const useRecents = (options: () => RecentsOptions | false): UseRecentsRet
   const forget = (id: string): void => change({ op: 'forget', id })
   const clear = (): void => change({ op: 'clear' })
 
-  const resolve = (commands: readonly Command[]): Command[] => {
+  const resolve = (commands: readonly Command[], exclude?: ReadonlySet<string>): Command[] => {
     const resolved = options()
     if (resolved === false) return []
-    return resolveRecents(entries.value, commands, resolved.display ?? RECENTS_DISPLAY)
+    return resolveRecents(entries.value, commands, resolved.display ?? RECENTS_DISPLAY, Date.now(), exclude)
   }
 
   // Entries change only through `record`, `forget` and `clear`, which also persist them.

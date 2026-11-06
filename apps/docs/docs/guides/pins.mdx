@@ -1,0 +1,56 @@
+---
+title: Pins
+description: Let people keep their own commands at the top of the list.
+---
+
+Recents drift with use. Pins are the commands someone chose to keep. They're off by default.
+
+```vue
+<CommandPaletteDialog :commands="commands" pins />
+<CommandPaletteDialog :commands="commands" :pins="{ namespace: user.id }" />
+```
+
+With pins on, Mod+D (⌘D on Apple, Ctrl+D elsewhere) toggles a pin on the selected row. The palette stops the browser's bookmark dialog while it has focus, and a screen reader hears "Pinned …" or "Unpinned …". The selection stays on the same command, even though the list reorders around it.
+
+## The Pinned group
+
+When the query is empty, no scope is active and the root page is shown, a "Pinned" group comes first, in the order the commands were pinned. A pinned command is listed once: it leaves its normal group and the Recent group, and the next recents fill the places it freed, up to the display limit. Any query, scope or child page hides the group, and pinned commands rank like any other.
+
+Any kind of command can be pinned, pages included. Ids that no longer match a command are skipped when the list is drawn.
+
+Pinned rows carry `data-pinned="true"`, and the `item` slot receives `pinned`. Both are true for a pinned command wherever it's listed, so a search result can show a pin mark too.
+
+## Options
+
+| option      | default         | meaning                                                          |
+| ----------- | --------------- | ---------------------------------------------------------------- |
+| `key`       | `vue-cmdk:pins` | The `localStorage` key for the default adapter.                  |
+| `namespace` | none            | Keeps separate lists under one key, for example one per account. |
+| `storage`   | `localStorage`  | Your own adapter. See below.                                     |
+
+Pins and recents use different keys by default, so turning one off never touches the other.
+
+## From code
+
+The dialog exposes `pin(id)`, `unpin(id)` and `togglePin(id)` on a template ref. They save through the configured storage and work while the dialog is closed. The headless composable has the same three methods, plus `pinned`, the list of ids.
+
+To seed pins for a new user, write to the adapter before the first open:
+
+```ts
+createPinsStorageAdapter({ namespace: user.id }).save(['search', 'settings'])
+```
+
+## Your own storage
+
+Pass an adapter to keep pins on a server. Both methods can be sync or async:
+
+```ts
+import type { PinsAdapter } from 'vue-cmdk-palette'
+
+const storage: PinsAdapter = {
+  load: () => api.get('/pins'),
+  save: (ids) => api.put('/pins', ids),
+}
+```
+
+Whatever `load` returns is checked, and anything that isn't a string is dropped. Pins made before an async `load` finishes are kept and applied to the stored list once it arrives. The default adapter swallows storage errors, so pins stay empty in a window with storage blocked.

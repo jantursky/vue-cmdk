@@ -21,6 +21,8 @@ export interface CommandContext {
   readonly mode: ActivationMode
   /** Closes the palette. Already called before `perform` unless `keepOpen` is set. */
   readonly close: () => void
+  /** The trimmed text typed in the argument step. Set only for commands with `argument`. */
+  readonly value?: string
 }
 
 interface BaseCommand {
@@ -56,14 +58,30 @@ interface BaseCommand {
   readonly meta?: Readonly<Record<string, unknown>>
 }
 
+/** One typed value an action asks for before it runs. */
+export interface CommandArgument {
+  /** Field placeholder during the argument step. */
+  readonly placeholder?: string
+  /** Text the field starts with. Default empty. */
+  readonly initial?: string
+  /** Return a message to refuse the value (shown as the row's reason), or nothing to accept it. */
+  readonly validate?: (value: string) => string | null | undefined
+}
+
 export interface ActionCommand extends BaseCommand {
   readonly kind: 'action'
   readonly perform: (context: CommandContext) => Awaitable<void>
+  /** Ask for a second activation before running: `true`, or the prompt shown on the armed row. */
+  readonly confirm?: boolean | string
+  /** Ask for one typed value before running. It reaches `perform` as `ctx.value`. */
+  readonly argument?: CommandArgument
 }
 
 export interface LinkCommand extends BaseCommand {
   readonly kind: 'link'
   readonly href: string
+  /** Ask for a second activation before following the link: `true`, or the prompt shown on the armed row. */
+  readonly confirm?: boolean | string
 }
 
 export interface PageCommand extends BaseCommand {
@@ -111,8 +129,10 @@ export interface RankedGroup {
   /** Text drawn over the rows. Empty for ungrouped rows. */
   readonly heading: string
   readonly rows: readonly RankedRow[]
-  /** True for the pinned recents group. */
+  /** True for the recents group. */
   readonly recent?: true
+  /** True for the pinned group. */
+  readonly pinned?: true
 }
 
 export interface PaletteList {
@@ -143,6 +163,12 @@ export interface RecentsAdapter {
   save(entries: readonly RecentEntry[]): Awaitable<void>
 }
 
+/** Where pinned command ids are kept, in the order they were pinned. */
+export interface PinsAdapter {
+  load(): Awaitable<readonly string[]>
+  save(ids: readonly string[]): Awaitable<void>
+}
+
 /** Every built-in string, overridable through the `labels` prop. */
 export interface PaletteLabels {
   placeholder: string
@@ -171,4 +197,14 @@ export interface PaletteLabels {
   capped: string
   /** Live-region text after a recent row is removed. `{label}` is replaced. */
   forgotten: string
+  /** Prompt on an armed row whose `confirm` is `true`. */
+  confirm: string
+  /** Heading of the Pinned group. */
+  pinned: string
+  /** Live-region text after a pin. `{label}` is replaced. */
+  pin: string
+  /** Live-region text after an unpin. `{label}` is replaced. */
+  unpin: string
+  /** Reason shown on the argument row while the value is empty. */
+  argumentEmpty: string
 }

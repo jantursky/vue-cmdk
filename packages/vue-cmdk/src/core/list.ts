@@ -18,6 +18,9 @@ export interface BuildListInput {
   /** Already resolved and ranked, at most the display limit. */
   readonly recents?: readonly Command[]
   readonly recentHeading?: string
+  /** Already resolved, in pinned order. Shown first for the empty query in no scope. */
+  readonly pinned?: readonly Command[]
+  readonly pinnedHeading?: string
 }
 
 interface Scored {
@@ -109,10 +112,24 @@ export const buildList = (input: BuildListInput): PaletteList => {
   )
   const inScope = scope === null ? found : found.filter(({ command }) => command.scope === scope)
 
-  // Recents lead the empty query in no scope. They are moved out of their own
-  // group rather than repeated: a row listed twice is two stops on one answer.
-  const recents = needle === '' && scope === null ? (input.recents ?? []) : []
-  const pinned: RankedGroup | null =
+  // Pinned and recent rows lead the empty query in no scope, pinned first. They are
+  // moved out of their own group rather than repeated: a row listed twice is two
+  // stops on one answer.
+  const leading = needle === '' && scope === null
+  const pins = leading ? (input.pinned ?? []) : []
+  const pinnedIds = new Set(pins.map((command) => command.id))
+  const recents = leading ? (input.recents ?? []).filter((command) => !pinnedIds.has(command.id)) : []
+
+  const pinnedGroup: RankedGroup | null =
+    pins.length === 0
+      ? null
+      : {
+          key: 'pinned',
+          heading: input.pinnedHeading ?? 'Pinned',
+          rows: pins.map((command) => drawRow(command, '')),
+          pinned: true,
+        }
+  const recentGroup: RankedGroup | null =
     recents.length === 0
       ? null
       : {
@@ -121,13 +138,17 @@ export const buildList = (input: BuildListInput): PaletteList => {
           rows: recents.map((command) => drawRow(command, '')),
           recent: true,
         }
-  const pinnedIds = new Set(recents.map((command) => command.id))
-  const rest = pinned === null ? inScope : inScope.filter(({ command }) => !pinnedIds.has(command.id))
+  const leadingIds = new Set([...pinnedIds, ...recents.map((command) => command.id)])
+  const rest = leadingIds.size === 0 ? inScope : inScope.filter(({ command }) => !leadingIds.has(command.id))
 
   const filed = fileUnderHeadings(rest, needle, input.commands, input.groupOrder ?? [])
   // The empty query is the answer to "what does this hold", so it is never cut.
   const groups = needle === '' ? filed : capped(filed, input.maxResults ?? MAX_RESULTS)
-  const all = pinned === null ? groups : [pinned, ...groups]
+  const all = [
+    ...(pinnedGroup === null ? [] : [pinnedGroup]),
+    ...(recentGroup === null ? [] : [recentGroup]),
+    ...groups,
+  ]
 
   return {
     groups: all,

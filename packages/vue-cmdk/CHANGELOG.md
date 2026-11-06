@@ -2,6 +2,23 @@
 
 All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-11-06
+
+### Added
+
+- `confirm` on `action` and `link` commands (`true` or a prompt string): the first activation arms the row and shows the prompt, the second runs the command. Moving the selection, typing, Escape or closing disarms it, with no timeout. New `armed` item slot prop, `data-armed` row attribute and `--cmdk-armed-bg` / `--cmdk-armed-fg` theme variables.
+- `argument` on `action` commands (`{ placeholder?, initial?, validate? }`): activating the command opens an input step with one row, and `perform` receives the trimmed text as `ctx.value`. `validate` can refuse the text with a message.
+- `pins` prop and composable option: Mod+D pins or unpins the selected row, and pinned commands show first in a "Pinned" group for an empty query. They are stored in `localStorage` under `vue-cmdk:pins` or in a custom `PinsAdapter`. Off by default.
+- `usePins()`, `createPinsStorageAdapter()`, and the `PinsAdapter`, `PinsOptions` and `CommandArgument` types.
+- `pin(id)`, `unpin(id)` and `togglePin(id)` on the composable and on both components, plus `armed`, `argumentCommand`, `pinned` and `arm(command)` on the composable. The `pinned` and `prompt` item slot props and the `data-pinned` row attribute.
+- New labels: `confirm`, `pinned`, `pin`, `unpin` and `argumentEmpty`.
+- With `bindShortcuts`, the shortcut of a `confirm` command opens the dialog with the row armed, and the shortcut of an `argument` command opens its input step. Neither runs before the user activates it.
+
+### Changed
+
+- Escape disarms an armed row first, and leaves an argument step like a child page. Backspace on an empty field also leaves the step.
+- Pinned commands are left out of the Recent group, and the next recents fill their places.
+
 ## [1.3.0] - 2026-10-28
 
 ### Added
@@ -82,6 +99,7 @@ The first version.
 - Replaceable labels for every built-in string.
 - An optional theme at `vue-cmdk-palette/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
 
+[1.4.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.4.0
 [1.3.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.3.0
 [1.2.2]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.2.2
 [1.2.1]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.2.1

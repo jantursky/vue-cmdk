@@ -14,9 +14,10 @@ description: Every key the palette handles, and how it works with screen readers
 | ⌘↵ / Ctrl+↵         | Alternate activation, for example opening a link in a new tab.       |
 | ⌘1-9 / Ctrl+1-9     | Activate the row at that position. Add ⇧ for alternate activation.   |
 | ⇥ / ⇧⇥              | Next or previous scope.                                              |
-| ⌫ on an empty field | Go back one page.                                                    |
+| ⌫ on an empty field | Go back one page, or leave an argument step.                         |
 | ⇧⌦ / ⇧⌫ on Apple    | Remove the selected row from recents, in the Recent group only.      |
-| Esc                 | Clear the query, then go back one page, then close.                  |
+| ⌘D / Ctrl+D         | Pin or unpin the selected row (with `pins`).                         |
+| Esc                 | Disarm an armed row, clear the query, go back one page, then close.  |
 
 The dialog's shortcut is set with `hotkey`, using `mod` for ⌘ on Apple platforms and Ctrl elsewhere: `hotkey="mod+shift+p"`. [Opening the palette](/guides/opening-the-palette) covers the syntax, Option shortcuts on a Mac, several shortcuts at once, and opening from code. Quick-select digits come from the physical key, so they work on keyboard layouts where the digits need Shift. Turn them off with `:quick-select="false"`.
 
@@ -26,7 +27,9 @@ Keys are ignored while an input method editor is composing text, so typing Japan
 
 The field is a `combobox` that controls a `listbox`. Rows are `option`s, and the selected one is announced through `aria-activedescendant`, so focus never leaves the field. Disabled rows carry `aria-disabled`, and groups are labelled by their headings.
 
-A polite live region announces the result count after each change to the query, and announces it when a recent is removed.
+A polite live region announces the result count after each change to the query. It also announces when a recent is removed, a command is pinned or unpinned, and the prompt of an armed row. The armed row stays the selected `option`, so the prompt is spoken on the row as well as in the live region.
+
+In an argument step the field keeps its role. Its placeholder names the value, the breadcrumb names the command, and the single row is disabled with a reason until the value is acceptable.
 
 ## Focus
 

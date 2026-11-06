@@ -70,9 +70,10 @@ const KEYS: [string, string][] = [
   [formatChord('mod+shift+c'), 'copy the URL, even with the palette closed'],
   ['⇥  ⇧⇥', 'switch scope chips'],
   ['>', 'type first to list only Run commands'],
-  ['⌫', 'go back from a nested list'],
+  ['⌫', 'go back from a nested list or an input step'],
+  [formatChord('mod+d'), 'pin or unpin the selected command'],
   [isApplePlatform() ? '⇧⌫' : 'Shift+Del', 'remove the selected recent'],
-  ['Esc', 'clear, then go back, then close'],
+  ['Esc', 'disarm, clear, then go back, then close'],
 ]
 </script>
 
@@ -146,7 +147,10 @@ const KEYS: [string, string][] = [
           </template>
         </dl>
         <p class="note">
-          Try typing <code>clip</code>, <code>changelog</code>, <code>>wire</code> or <code>debug</code>.
+          Try typing <code>clip</code>, <code>changelog</code>, <code>>wire</code> or <code>debug</code>. Pick
+          <em>Delete project</em> to see a row ask for a second Enter, <em>Rename file…</em> to type a value, and pin
+          anything with <kbd>{{ formatChord('mod+d') }}</kbd
+          >.
         </p>
       </section>
 
@@ -157,6 +161,8 @@ const KEYS: [string, string][] = [
           <dd>{{ app.route }}</dd>
           <dt>Language</dt>
           <dd>{{ app.language }}</dd>
+          <dt>File name</dt>
+          <dd>{{ app.fileName }}</dd>
           <dt>Theme</dt>
           <dd>{{ app.theme }}</dd>
           <dt>Wireframe</dt>
@@ -201,6 +207,7 @@ const KEYS: [string, string][] = [
       :group-order="groupOrder"
       :navigate="navigate"
       :recents="{ key: 'vue-cmdk-demo:recents' }"
+      :pins="{ key: 'vue-cmdk-demo:pins' }"
       show-detail
       open-on-slash
       bind-shortcuts

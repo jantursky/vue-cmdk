@@ -17,6 +17,7 @@ export {
   type UseCommandPaletteReturn,
 } from './composables/useCommandPalette'
 export { useRecents, type RecentsOptions, type UseRecentsReturn } from './composables/useRecents'
+export { usePins, type PinsOptions, type UsePinsReturn } from './composables/usePins'
 export { useCommandShortcuts, type UseCommandShortcutsOptions } from './composables/useCommandShortcuts'
 export { useHotkey, type UseHotkeyOptions } from './composables/useHotkey'
 export { useFocusTrap, type UseFocusTrapReturn } from './composables/useFocusTrap'
@@ -39,8 +40,12 @@ export {
 export { DEFAULT_LABELS } from './core/labels'
 export {
   createLocalStorageAdapter,
+  createPinsStorageAdapter,
+  PINS_STORAGE_KEY,
   RECENTS_STORAGE_KEY,
   type LocalStorageAdapterOptions,
+  type PinsStorageAdapterOptions,
+  type SyncPinsAdapter,
   type SyncRecentsAdapter,
 } from './storage/localStorageAdapter'
 export type {
@@ -48,6 +53,7 @@ export type {
   ActivationMode,
   Awaitable,
   Command,
+  CommandArgument,
   CommandContext,
   CommandIcon,
   FilterFn,
@@ -55,6 +61,7 @@ export type {
   PageCommand,
   PaletteLabels,
   PaletteList,
+  PinsAdapter,
   RankedGroup,
   RankedRow,
   RecentEntry,

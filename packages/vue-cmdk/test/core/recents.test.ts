@@ -139,3 +139,17 @@ describe('createLocalStorageAdapter', () => {
     expect(() => adapter.save([{ id: 'a', lastUsedAt: NOW, hitCount: 1 }])).not.toThrow()
   })
 })
+
+describe('resolveRecents with exclusions', () => {
+  const commands = ['a', 'b', 'c', 'd', 'e', 'f', 'g'].map((id) => action(id, id.toUpperCase()))
+  const entries = commands.map((command, index) => ({ id: command.id, lastUsedAt: NOW, hitCount: 20 - index }))
+
+  it('skips excluded ids and fills the display limit with the next entries', () => {
+    const out = resolveRecents(entries, commands, 5, NOW, new Set(['a']))
+    expect(out.map((c) => c.id)).toEqual(['b', 'c', 'd', 'e', 'f'])
+  })
+
+  it('returns fewer when too few remain', () => {
+    expect(resolveRecents(entries.slice(0, 2), commands, 5, NOW, new Set(['a'])).map((c) => c.id)).toEqual(['b'])
+  })
+})

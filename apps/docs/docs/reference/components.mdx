@@ -7,21 +7,22 @@ description: Props, events, slots and labels for CommandPalette and CommandPalet
 
 ## Props
 
-| prop            | default           |                                                            |
-| --------------- | ----------------- | ---------------------------------------------------------- |
-| `commands`      | `[]`              | The root list. See [Commands](/guides/commands).           |
-| `scopes`        | `[]`              | See [Scopes](/guides/scopes).                              |
-| `group-order`   | declaration order | Heading order for an empty query.                          |
-| `max-results`   | `40`              | The total number of rows drawn for a non-empty query.      |
-| `filter`        | built-in          | See [Search](/guides/search#a-custom-matcher).             |
-| `recents`       | `true`            | `false`, `true`, or `RecentsOptions`.                      |
-| `quick-select`  | `true`            | ⌘/Ctrl+1-9.                                                |
-| `show-detail`   | `false`           | The band below the list that describes the selected row.   |
-| `labels`        | English           | Every built-in string. Pass any subset of `PaletteLabels`. |
-| `navigate`      | `location.href`   | A router hook for `link` commands.                         |
-| `chord`         | dialog: `hotkey`  | The chord printed in the footer. `false` hides it.         |
-| `autofocus`     | `true`            | Focus the field on mount.                                  |
-| `v-model:query` | `''`              | The text in the field.                                     |
+| prop            | default           |                                                              |
+| --------------- | ----------------- | ------------------------------------------------------------ |
+| `commands`      | `[]`              | The root list. See [Commands](/guides/commands).             |
+| `scopes`        | `[]`              | See [Scopes](/guides/scopes).                                |
+| `group-order`   | declaration order | Heading order for an empty query.                            |
+| `max-results`   | `40`              | The total number of rows drawn for a non-empty query.        |
+| `filter`        | built-in          | See [Search](/guides/search#a-custom-matcher).               |
+| `recents`       | `true`            | `false`, `true`, or `RecentsOptions`.                        |
+| `pins`          | `false`           | `false`, `true`, or `PinsOptions`. See [Pins](/guides/pins). |
+| `quick-select`  | `true`            | ⌘/Ctrl+1-9.                                                  |
+| `show-detail`   | `false`           | The band below the list that describes the selected row.     |
+| `labels`        | English           | Every built-in string. Pass any subset of `PaletteLabels`.   |
+| `navigate`      | `location.href`   | A router hook for `link` commands.                           |
+| `chord`         | dialog: `hotkey`  | The chord printed in the footer. `false` hides it.           |
+| `autofocus`     | `true`            | Focus the field on mount.                                    |
+| `v-model:query` | `''`              | The text in the field.                                       |
 
 ### Dialog only
 
@@ -61,12 +62,12 @@ description: Props, events, slots and labels for CommandPalette and CommandPalet
 
 Reach these through a template ref.
 
-| component              | exposes                                                                                                                                         |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CommandPalette`       | `focus()`, `reset()`, `back()`, `move(step)`, `activate(row)`, `forgetRecent(id)`, `clearRecents()`, and `palette`, the full composable return. |
-| `CommandPaletteDialog` | `show()`, `hide()`, `toggle()`, `focus()`, `forgetRecent(id)`, `clearRecents()`.                                                                |
+| component              | exposes                                                                                                                                                                                                  |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CommandPalette`       | `focus()`, `reset()`, `back()`, `move(step)`, `activate(row)`, `arm(command)`, `forgetRecent(id)`, `clearRecents()`, `pin(id)`, `unpin(id)`, `togglePin(id)`, and `palette`, the full composable return. |
+| `CommandPaletteDialog` | `show()`, `hide()`, `toggle()`, `focus()`, `forgetRecent(id)`, `clearRecents()`, `pin(id)`, `unpin(id)`, `togglePin(id)`.                                                                                |
 
-The dialog's recents methods work while it's closed too. They write straight to the configured storage, and the next open shows the result.
+The dialog's recents and pin methods work while it's closed too. They write straight to the configured storage, and the next open shows the result.
 
 ## Slots
 
@@ -74,26 +75,31 @@ See [Custom rows and slots](/guides/custom-rows#slots).
 
 ## Labels
 
-| key           | default                                                       |
-| ------------- | ------------------------------------------------------------- |
-| `placeholder` | `Search commands…`                                            |
-| `empty`       | `Nothing matches`                                             |
-| `emptyHint`   | `Try a different word, or part of a description.`             |
-| `loading`     | `Loading…`                                                    |
-| `recent`      | `Recent`                                                      |
-| `all`         | `All`                                                         |
-| `dialog`      | `Command palette`                                             |
-| `list`        | `Commands`                                                    |
-| `move`        | `move`                                                        |
-| `open`        | `open`                                                        |
-| `run`         | `run`                                                         |
-| `back`        | `back`                                                        |
-| `forget`      | `remove`                                                      |
-| `toggle`      | `open / close`                                                |
-| `scope`       | `scope`                                                       |
-| `clear`       | `Clear the search`                                            |
-| `noSelection` | `Nothing is selected. Keep typing, or press Escape to close.` |
-| `results`     | `{count} results`                                             |
-| `resultsOne`  | `{count} result`                                              |
-| `capped`      | `first {shown} of {matched}`                                  |
-| `forgotten`   | `Removed {label} from recent`                                 |
+| key             | default                                                       |
+| --------------- | ------------------------------------------------------------- |
+| `placeholder`   | `Search commands…`                                            |
+| `empty`         | `Nothing matches`                                             |
+| `emptyHint`     | `Try a different word, or part of a description.`             |
+| `loading`       | `Loading…`                                                    |
+| `recent`        | `Recent`                                                      |
+| `all`           | `All`                                                         |
+| `dialog`        | `Command palette`                                             |
+| `list`          | `Commands`                                                    |
+| `move`          | `move`                                                        |
+| `open`          | `open`                                                        |
+| `run`           | `run`                                                         |
+| `back`          | `back`                                                        |
+| `forget`        | `remove`                                                      |
+| `toggle`        | `open / close`                                                |
+| `scope`         | `scope`                                                       |
+| `clear`         | `Clear the search`                                            |
+| `noSelection`   | `Nothing is selected. Keep typing, or press Escape to close.` |
+| `results`       | `{count} results`                                             |
+| `resultsOne`    | `{count} result`                                              |
+| `capped`        | `first {shown} of {matched}`                                  |
+| `forgotten`     | `Removed {label} from recent`                                 |
+| `confirm`       | `Press Enter again to confirm`                                |
+| `pinned`        | `Pinned`                                                      |
+| `pin`           | `Pinned {label}`                                              |
+| `unpin`         | `Unpinned {label}`                                            |
+| `argumentEmpty` | `Type a value`                                                |

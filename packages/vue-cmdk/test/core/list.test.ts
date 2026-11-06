@@ -176,3 +176,59 @@ describe('list size', () => {
     expect(best).toBeLessThan(50)
   })
 })
+
+describe('buildList pinned and recent groups', () => {
+  const byId = (id: string): Command => COMMANDS.find((command) => command.id === id)!
+  const ids = (rows: readonly { command: Command }[]) => rows.map((row) => row.command.id)
+
+  it('shows Pinned first, in pinned order, then Recent, then the rest', () => {
+    const list = buildList({
+      commands: COMMANDS,
+      query: '',
+      pinned: [byId('theme'), byId('colors')],
+      recents: [byId('fonts')],
+    })
+    expect(list.groups.map((g) => g.heading).slice(0, 3)).toEqual(['Pinned', 'Recent', 'Run'])
+    expect(list.groups[0]).toMatchObject({ key: 'pinned', pinned: true })
+    expect(ids(list.groups[0]?.rows ?? [])).toEqual(['theme', 'colors'])
+  })
+
+  it('lists each command once across Pinned, Recent and its own group', () => {
+    const list = buildList({
+      commands: COMMANDS,
+      query: '',
+      pinned: [byId('colors')],
+      recents: [byId('colors'), byId('fonts')],
+    })
+    const all = ids(list.rows)
+    expect(all.filter((id) => id === 'colors')).toHaveLength(1)
+    expect(all.filter((id) => id === 'fonts')).toHaveLength(1)
+    expect(ids(list.groups.find((g) => g.recent)?.rows ?? [])).toEqual(['fonts'])
+  })
+
+  it('uses the given headings', () => {
+    const list = buildList({ commands: COMMANDS, query: '', pinned: [byId('fonts')], pinnedHeading: 'Épinglés' })
+    expect(list.groups[0]?.heading).toBe('Épinglés')
+  })
+
+  it('shows no Pinned group for a query, a scope or a typed prefix', () => {
+    const pinned = [byId('colors')]
+    expect(buildList({ commands: COMMANDS, query: 'co', pinned }).groups.some((g) => g.pinned)).toBe(false)
+    expect(
+      buildList({ commands: COMMANDS, query: '', pinned, scopes: SCOPES, scope: 'tools' }).groups.some((g) => g.pinned),
+    ).toBe(false)
+    expect(buildList({ commands: COMMANDS, query: '>', pinned, scopes: SCOPES }).groups.some((g) => g.pinned)).toBe(
+      false,
+    )
+  })
+
+  it('pinned commands still rank like any other with a query', () => {
+    const list = buildList({ commands: COMMANDS, query: 'colors', pinned: [byId('colors')] })
+    expect(ids(list.rows)[0]).toBe('colors')
+  })
+
+  it('counts the whole list for an empty query without the group duplicating rows', () => {
+    const list = buildList({ commands: COMMANDS, query: '', pinned: [byId('colors')] })
+    expect(list.rows).toHaveLength(COMMANDS.filter((c) => c.hidden !== true).length)
+  })
+})

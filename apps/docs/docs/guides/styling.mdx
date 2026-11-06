@@ -41,6 +41,7 @@ Every color, size and font in the theme is a `--cmdk-*` custom property. Overrid
 | `--cmdk-accent`, `--cmdk-accent-fg`                | The selected row, active chip, and focus marks.   |
 | `--cmdk-highlight`                                 | The color of matched text.                        |
 | `--cmdk-badge-bg`, `--cmdk-badge-fg`               | Badges.                                           |
+| `--cmdk-armed-bg`, `--cmdk-armed-fg`               | A row waiting for its second activation.          |
 | `--cmdk-overlay`, `--cmdk-shadow`                  | The backdrop and the dialog's shadow.             |
 
 The dialog is teleported to `body`, so for a dialog, set variables on `:root` or `body` rather than on the component's parent. An inline palette picks them up from any ancestor.
@@ -49,7 +50,7 @@ The dialog is teleported to `body`, so for a dialog, set variables on `:root` or
 
 ## 3. Data attributes
 
-Every part has a `data-cmdk-*` attribute, and state lives in `data-selected`, `data-disabled` and `data-active`. Write ordinary CSS against them, either on top of the theme or instead of it:
+Every part has a `data-cmdk-*` attribute, and state lives in `data-selected`, `data-disabled`, `data-active`, `data-armed` and `data-pinned`. Write ordinary CSS against them, either on top of the theme or instead of it:
 
 ```css
 [data-cmdk-item][data-selected='true'] {
@@ -63,6 +64,15 @@ Every part has a `data-cmdk-*` attribute, and state lives in `data-selected`, `d
 ```
 
 In a component with `<style scoped>`, wrap the selectors in `:deep()`, because the palette's markup isn't part of your component's scope.
+
+An armed row (`data-armed='true'`) is tinted with `--cmdk-armed-bg` and `--cmdk-armed-fg`, a warning red by default. Its prompt is `[data-cmdk-confirm]`, and the text typed in an argument step is `[data-cmdk-item-value]`:
+
+```css
+[data-cmdk-item][data-armed='true'] {
+  background: #fee2e2;
+  box-shadow: inset 0 0 0 1px #dc2626;
+}
+```
 
 The main hooks are `data-cmdk-root`, `-overlay`, `-dialog`, `-field`, `-input`, `-scopes`, `-chip`, `-list`, `-group`, `-group-heading`, `-item`, `-item-label`, `-icon`, `-badge`, `-kbd`, `-highlight`, `-detail` and `-footer`.
 

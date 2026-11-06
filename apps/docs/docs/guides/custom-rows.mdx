@@ -18,18 +18,20 @@ Every visible part of the palette has a slot. The row wrapper still owns selecti
 
 ## Slots
 
-| slot            | props                                                    |
-| --------------- | -------------------------------------------------------- |
-| `item`          | `row, command, label, selected, disabled, reason, digit` |
-| `group-heading` | `group, heading, count`                                  |
-| `empty`         | `query, labels`                                          |
-| `loading`       |                                                          |
-| `detail`        | `row, verb` (rendered only with `show-detail`)           |
-| `footer`        | `list, selected, verb`                                   |
-| `breadcrumb`    | `trail`                                                  |
-| `input-prefix`  |                                                          |
+| slot            | props                                                                           |
+| --------------- | ------------------------------------------------------------------------------- |
+| `item`          | `row, command, label, selected, disabled, reason, digit, armed, prompt, pinned` |
+| `group-heading` | `group, heading, count`                                                         |
+| `empty`         | `query, labels`                                                                 |
+| `loading`       |                                                                                 |
+| `detail`        | `row, verb` (rendered only with `show-detail`)                                  |
+| `footer`        | `list, selected, verb`                                                          |
+| `breadcrumb`    | `trail`                                                                         |
+| `input-prefix`  |                                                                                 |
 
-In the `item` slot, `reason` is the disabled reason (an empty string for a plain `disabled: true`, `null` when enabled), and `digit` is the quick-select number, or `null`.
+In the `item` slot, `reason` is the disabled reason (an empty string for a plain `disabled: true`, `null` when enabled), and `digit` is the quick-select number, or `null`. `armed` is true while the row waits for a second activation, and `prompt` is then the text to show for it (`null` otherwise). `pinned` is true for a pinned command. A custom row that ignores `armed` leaves a confirm command with no visible prompt, so draw it.
+
+In an argument step the list has one row, and the text typed is the palette's `query`. Read `useCommandPaletteContext().argumentCommand.value` to tell that step from a normal list.
 
 ## Labels
 

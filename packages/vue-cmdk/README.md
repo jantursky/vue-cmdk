@@ -83,23 +83,38 @@ Every command has an `id` (unique within its list), a `label`, and a `kind`:
 
 Optional fields:
 
-| field            | meaning                                                                               |
-| ---------------- | ------------------------------------------------------------------------------------- |
-| `group`          | The heading the row is filed under.                                                   |
-| `scope`          | The id of a scope chip (see [Scopes](#scopes)).                                       |
-| `hint`           | A one-line description. It is searched and shown in the detail panel.                 |
-| `keywords`       | Words someone might type that aren't in the label.                                    |
-| `icon`           | A component or a string, such as an emoji.                                            |
-| `shortcut`       | Key caps printed on the row: `'mod+shift+c'` or `['⌥', 'W']`.                         |
-| `badge`          | A short tag next to the label.                                                        |
-| `disabled`       | `true`, or a reason string that is shown on the row. Disabled rows can't be selected. |
-| `hidden`         | The row isn't listed for an empty query, but search still finds it.                   |
-| `keepOpen`       | The palette stays open after activation.                                              |
-| `trackRecent`    | Set to `false` to keep the command out of recents.                                    |
-| `alternateLabel` | The footer hint for ⌘/Ctrl+Enter, such as `Open in new tab`.                          |
-| `verb`           | The word for what Enter does. The default is `run` for actions and `open` otherwise.  |
-| `placeholder`    | `page` commands only: the field placeholder while the page is open.                   |
-| `meta`           | Free-form data for your own slots. The palette never reads it.                        |
+| field            | meaning                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `group`          | The heading the row is filed under.                                                                          |
+| `scope`          | The id of a scope chip (see [Scopes](#scopes)).                                                              |
+| `hint`           | A one-line description. It is searched and shown in the detail panel.                                        |
+| `keywords`       | Words someone might type that aren't in the label.                                                           |
+| `icon`           | A component or a string, such as an emoji.                                                                   |
+| `shortcut`       | Key caps printed on the row: `'mod+shift+c'` or `['⌥', 'W']`.                                                |
+| `badge`          | A short tag next to the label.                                                                               |
+| `disabled`       | `true`, or a reason string that is shown on the row. Disabled rows can't be selected.                        |
+| `hidden`         | The row isn't listed for an empty query, but search still finds it.                                          |
+| `keepOpen`       | The palette stays open after activation.                                                                     |
+| `trackRecent`    | Set to `false` to keep the command out of recents.                                                           |
+| `confirm`        | `action` and `link` only: `true` or a prompt string. The first activation arms the row, the second runs it.  |
+| `argument`       | `action` only: `{ placeholder?, initial?, validate? }`. Opens an input step, and `perform` gets `ctx.value`. |
+| `alternateLabel` | The footer hint for ⌘/Ctrl+Enter, such as `Open in new tab`.                                                 |
+| `verb`           | The word for what Enter does. The default is `run` for actions and `open` otherwise.                         |
+| `placeholder`    | `page` commands only: the field placeholder while the page is open.                                          |
+| `meta`           | Free-form data for your own slots. The palette never reads it.                                               |
+
+A command with `confirm` doesn't run on the first Enter, click or digit. The row is armed instead and shows the prompt, and a second activation runs it. Moving the selection, typing, Escape or closing disarms it, and there is no timeout. A command with `argument` opens an input step with one row, whose text reaches `perform` as `ctx.value`. `validate` can return a message to refuse the text.
+
+```ts
+{ kind: 'action', id: 'delete', label: 'Delete project', confirm: 'Press Enter again to delete', perform: remove },
+{
+  kind: 'action',
+  id: 'rename',
+  label: 'Rename file',
+  argument: { placeholder: 'New name', validate: (name) => (name.includes('/') ? 'No slashes' : null) },
+  perform: ({ value }) => rename(value),
+},
+```
 
 Errors thrown or rejected by `perform` or by `children` are caught and emitted as `error`.
 
@@ -171,18 +186,29 @@ const storage: RecentsAdapter = {
 
 Shift+Delete (Shift+Backspace on a Mac) removes the selected row from the Recent group. To clear history from a settings page, call `clearRecents()` or `forgetRecent(id)` on a template ref. Both also work while the dialog is closed.
 
+## Pins
+
+Pins are off by default. With `pins` on, Mod+D pins or unpins the selected row, and pinned commands show first in a "Pinned" group for an empty query. They're saved in `localStorage` under `vue-cmdk:pins`, or in your own `PinsAdapter`.
+
+```vue
+<CommandPaletteDialog :commands="commands" pins />
+<CommandPaletteDialog :commands="commands" :pins="{ namespace: user.id }" />
+```
+
+Call `pin(id)`, `unpin(id)` or `togglePin(id)` on a template ref to change them from code.
+
 ## Slots
 
-| slot            | props                                                    |
-| --------------- | -------------------------------------------------------- |
-| `item`          | `row, command, label, selected, disabled, reason, digit` |
-| `group-heading` | `group, heading, count`                                  |
-| `empty`         | `query, labels`                                          |
-| `loading`       |                                                          |
-| `detail`        | `row, verb` (rendered only with `show-detail`)           |
-| `footer`        | `list, selected, verb`                                   |
-| `breadcrumb`    | `trail`                                                  |
-| `input-prefix`  |                                                          |
+| slot            | props                                                                           |
+| --------------- | ------------------------------------------------------------------------------- |
+| `item`          | `row, command, label, selected, disabled, reason, digit, armed, prompt, pinned` |
+| `group-heading` | `group, heading, count`                                                         |
+| `empty`         | `query, labels`                                                                 |
+| `loading`       |                                                                                 |
+| `detail`        | `row, verb` (rendered only with `show-detail`)                                  |
+| `footer`        | `list, selected, verb`                                                          |
+| `breadcrumb`    | `trail`                                                                         |
+| `input-prefix`  |                                                                                 |
 
 The row wrapper still owns selection, ARIA attributes, and clicks, so a custom `item` can't break keyboard use:
 
@@ -236,6 +262,7 @@ The attribute getters (`fieldAttrs`, `listAttrs`, `rowAttrs`, `groupAttrs`, `chi
 | `max-results`    | `40`              | The total number of rows drawn for a non-empty query.        |
 | `filter`         | built-in          |                                                              |
 | `recents`        | `true`            | `false`, `true`, or `RecentsOptions`.                        |
+| `pins`           | `false`           | `false`, `true`, or `PinsOptions`.                           |
 | `quick-select`   | `true`            | ⌘/Ctrl+1-9.                                                  |
 | `show-detail`    | `false`           | The band below the list that describes the selected row.     |
 | `labels`         | English           | Every built-in string. Pass any subset of `PaletteLabels`.   |
@@ -264,9 +291,10 @@ Events: `select(command, mode)`, `error(error, command)`, `close()` (inline only
 | ⌘↵ / Ctrl+↵         | Alternate activation, for example opening a link in a new tab.      |
 | ⌘1-9 / Ctrl+1-9     | Activate the row at that position. Add ⇧ for alternate activation.  |
 | ⇥ / ⇧⇥              | Next or previous scope.                                             |
-| ⌫ on an empty field | Go back one page.                                                   |
+| ⌫ on an empty field | Go back one page, or leave an argument step.                        |
+| ⌘D / Ctrl+D         | Pin or unpin the selected row (with `pins`).                        |
 | ⇧⌦ / ⇧⌫ on a Mac    | Remove the selected row from recents, in the Recent group only.     |
-| Esc                 | Clear the query, then go back one page, then close.                 |
+| Esc                 | Disarm an armed row, clear the query, go back one page, then close. |
 | A command's chord   | With `bind-shortcuts`, run that command while the dialog is closed. |
 
 Change the dialog's shortcut with `hotkey`, for example `hotkey="mod+shift+p"` or `hotkey="alt+space"`. Modifiers are `mod` (⌘ on a Mac, Ctrl elsewhere), `ctrl`, `meta`, `alt` and `shift`, and they must match exactly. Shortcuts with ⌥ work on a Mac too, even though ⌥ changes the character a key types there. For several shortcuts at once, set `:hotkey="false"` and call `useHotkey` with `parseChord` and `matchesChord`. To open the palette from code, set `v-model:open`, or call `show()`, `hide()` or `toggle()` on a template ref.

@@ -43,6 +43,8 @@ const commands: Command[] = [
 | `hidden`         | The row isn't listed for an empty query, but search still finds it.                   |
 | `keepOpen`       | The palette stays open after activation.                                              |
 | `trackRecent`    | Set to `false` to keep the command out of recents.                                    |
+| `confirm`        | `action` and `link` only: ask for a second activation. See below.                     |
+| `argument`       | `action` only: ask for one typed value before running. See below.                     |
 | `alternateLabel` | The footer hint for ⌘/Ctrl+Enter, such as `Open in new tab`.                          |
 | `verb`           | The word for what Enter does. The default is `run` for actions and `open` otherwise.  |
 | `placeholder`    | `page` commands only: the field placeholder while the page is open.                   |
@@ -52,13 +54,56 @@ The palette always prints a `shortcut`. With `bind-shortcuts` on the dialog, a c
 
 Commands can also come from components that are mounted right now, through a registry. See the same guide.
 
+## Asking for confirmation
+
+Set `confirm` on a command that is destructive or hard to undo. The first Enter, click or quick-select digit doesn't run it. It selects the row and arms it, and the row shows the prompt: your string, or the `confirm` label ("Press Enter again to confirm") when you pass `true`. A second activation runs the command.
+
+```ts
+{
+  kind: 'action',
+  id: 'delete-project',
+  label: 'Delete project',
+  confirm: 'Press Enter again to delete',
+  perform: () => api.deleteProject(),
+}
+```
+
+An armed row is disarmed when the selection moves, the query or scope changes, a page opens, Escape is pressed or the palette closes. Escape disarms first and leaves the query alone, so a second Escape clears it. There is no timeout: an armed row stays armed until the user does one of those things. Arming emits no `select` event and records no recent.
+
+Screen readers hear the prompt through the live region, and the row carries `data-armed="true"` for styling.
+
+## Asking for a value
+
+Set `argument` on an action that needs one piece of text, such as a new name or a line number. Activating it opens an input step instead of running it. The field takes `initial` (empty by default) and shows `placeholder`, the breadcrumb shows the command's label, and the list holds a single row: the command, with the typed text beside it.
+
+```ts
+{
+  kind: 'action',
+  id: 'rename',
+  label: 'Rename file',
+  argument: {
+    placeholder: 'New name',
+    initial: file.name,
+    validate: (value) => (value.includes('/') ? 'A name cannot contain a slash' : null),
+  },
+  perform: ({ value }) => files.rename(file.id, value),
+}
+```
+
+The row is disabled while the trimmed text is empty (the `argumentEmpty` label is its reason), and while `validate` returns a string, which is shown as the reason. Enter on the enabled row runs `perform` with the trimmed text as `ctx.value`, then follows the usual outcome: the palette closes and a recent is recorded.
+
+Backspace on an empty field, or Escape on an empty field, goes back to the list the command came from. Search, recents, pins and the no-results event don't apply during the step, and `currentPage` stays `undefined`. A command with both `argument` and `confirm` arms on the value row after you press Enter once.
+
+With [bound shortcuts](/guides/registry-and-shortcuts), the shortcut of a `confirm` command opens the dialog with the row armed, and the shortcut of an `argument` command opens its input step. Neither runs before you activate it inside the palette.
+
 ## The perform context
 
-`perform` receives `{ command, mode, close }`:
+`perform` receives `{ command, mode, close, value }`:
 
 - `command` is the command that ran, handy when several commands share one function.
 - `mode` is `'primary'` for Enter or a click, and `'alternate'` for ⌘/Ctrl+Enter or a modified click.
 - `close()` closes the palette. It has already been called before `perform` runs, unless the command sets `keepOpen`.
+- `value` is the trimmed text typed in the argument step. It is set only for commands with `argument`.
 
 ## Errors
 

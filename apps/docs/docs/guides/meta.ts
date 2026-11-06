@@ -11,6 +11,7 @@ export default defineMeta({
     'search',
     'scopes',
     'recents',
+    'pins',
     'custom-rows',
     'headless',
     'styling',

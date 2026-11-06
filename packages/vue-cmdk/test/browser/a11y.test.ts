@@ -83,4 +83,41 @@ describe('axe', () => {
     await waitFor(() => document.querySelector('[data-cmdk-list]')?.textContent.includes('Light') === true)
     await expectNoViolations()
   })
+
+  for (const theme of ['light', 'dark'] as const) {
+    it(`finds nothing with an armed row (${theme})`, async () => {
+      document.documentElement.setAttribute('data-theme', theme)
+      mountInBody(CommandPalette, {
+        commands: [action('del', 'Delete project', { confirm: 'Press Enter again to delete' }), ...commands],
+      })
+      await waitFor(() => document.activeElement?.hasAttribute('data-cmdk-input') === true)
+      await userEvent.keyboard('Delete project')
+      await userEvent.keyboard('{Enter}')
+      await waitFor(() => document.querySelector('[data-armed="true"]') !== null)
+      await expectNoViolations()
+    })
+
+    it(`finds nothing in the argument step, empty and filled (${theme})`, async () => {
+      document.documentElement.setAttribute('data-theme', theme)
+      mountInBody(CommandPalette, {
+        commands: [action('rename', 'Rename file', { argument: { placeholder: 'New name' } }), ...commands],
+      })
+      await waitFor(() => document.activeElement?.hasAttribute('data-cmdk-input') === true)
+      await userEvent.keyboard('Rename file')
+      await userEvent.keyboard('{Enter}')
+      await waitFor(() => document.querySelector('[data-cmdk-breadcrumb-row]') !== null)
+      // Empty: the single row is disabled with its reason.
+      await expectNoViolations()
+      await userEvent.keyboard('notes.md')
+      await waitFor(() => document.querySelector('[data-cmdk-item-value]')?.textContent === 'notes.md')
+      await expectNoViolations()
+    })
+  }
+
+  it('finds nothing with a Pinned group', async () => {
+    const storage = { load: () => ['beta'], save: () => undefined }
+    mountInBody(CommandPalette, { commands, pins: { storage } })
+    await waitFor(() => document.querySelector('[data-pinned="true"]') !== null)
+    await expectNoViolations()
+  })
 })

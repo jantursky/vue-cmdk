@@ -273,3 +273,52 @@ describe('development warnings', () => {
     expect(wrapper.findAll('[data-cmdk-item]')).toHaveLength(2)
   })
 })
+
+describe('confirmation and argument rows', () => {
+  it('draws an armed row with data-armed, its prompt and the armed slot prop', async () => {
+    const perform = vi.fn()
+    const seen: boolean[] = []
+    const wrapper = render(
+      { commands: [action('del', 'Delete project', { confirm: 'Press Enter again to delete', perform })] },
+      {
+        item: (slotProps: { armed: boolean; prompt: string | null }) => {
+          seen.push(slotProps.armed)
+          return h('span', slotProps.armed ? `armed:${slotProps.prompt}` : 'idle')
+        },
+      },
+    )
+    expect(wrapper.find('[data-cmdk-item]').attributes('data-armed')).toBeUndefined()
+    await wrapper.find('input').trigger('keydown', { key: 'Enter' })
+    await nextTick()
+    const row = wrapper.find('[data-cmdk-item]')
+    expect(row.attributes('data-armed')).toBe('true')
+    expect(row.text()).toBe('armed:Press Enter again to delete')
+    expect(seen).toContain(true)
+    expect(perform).not.toHaveBeenCalled()
+  })
+
+  it('shows the prompt in the default row and clears it when disarmed', async () => {
+    const wrapper = render({ commands: [action('del', 'Delete project', { confirm: true }), action('b', 'Other')] })
+    await wrapper.find('input').trigger('keydown', { key: 'Enter' })
+    await nextTick()
+    expect(wrapper.find('[data-cmdk-confirm]').text()).toBe('Press Enter again to confirm')
+    expect(wrapper.find('[data-cmdk-live]').text()).toBe('Press Enter again to confirm')
+    await wrapper.find('input').trigger('keydown', { key: 'ArrowDown' })
+    await nextTick()
+    expect(wrapper.find('[data-cmdk-confirm]').exists()).toBe(false)
+    expect(wrapper.find('[data-armed="true"]').exists()).toBe(false)
+  })
+
+  it('draws the argument step as one row with the typed value, the breadcrumb and the placeholder', async () => {
+    const wrapper = render({
+      commands: [action('rename', 'Rename file', { argument: { placeholder: 'New name', initial: 'draft.md' } })],
+    })
+    await wrapper.find('input').trigger('keydown', { key: 'Enter' })
+    await nextTick()
+    expect(wrapper.findAll('[data-cmdk-item]')).toHaveLength(1)
+    expect(wrapper.find('[data-cmdk-item-value]').text()).toBe('draft.md')
+    expect(wrapper.find('input').attributes('placeholder')).toBe('New name')
+    expect(wrapper.find('[data-cmdk-breadcrumb-row]').text()).toContain('Rename file')
+    expect(wrapper.find('input').element.value).toBe('draft.md')
+  })
+})

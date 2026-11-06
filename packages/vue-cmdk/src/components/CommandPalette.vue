@@ -29,6 +29,7 @@ const palette = useCommandPalette({
   maxResults: () => props.maxResults,
   filter: toRef(props, 'filter'),
   recents: () => props.recents,
+  pins: () => props.pins,
   quickSelect: () => props.quickSelect,
   labels: () => props.labels,
   query,
@@ -131,8 +132,12 @@ defineExpose({
   back: palette.back,
   move: palette.move,
   activate: palette.activate,
+  arm: palette.arm,
   forgetRecent: palette.forgetRecent,
   clearRecents: palette.clearRecents,
+  pin: palette.pin,
+  unpin: palette.unpin,
+  togglePin: palette.togglePin,
   palette,
 })
 </script>
@@ -224,12 +229,18 @@ defineExpose({
               :disabled="palette.disabledReason(row.command) !== null"
               :reason="palette.disabledReason(row.command)"
               :digit="palette.quickSelectDigit(row)"
+              :armed="palette.isArmed(row)"
+              :prompt="palette.isArmed(row) ? palette.confirmPrompt(row.command) : null"
+              :pinned="palette.isPinned(row)"
             >
               <PaletteItem
                 :row="row"
                 :reason="palette.disabledReason(row.command)"
                 :meta="meta(row, group.recent)"
                 :digit="palette.quickSelectDigit(row)"
+                :armed="palette.isArmed(row)"
+                :prompt="palette.isArmed(row) ? palette.confirmPrompt(row.command) : undefined"
+                :value="row.command === palette.argumentCommand.value ? query : undefined"
               />
             </slot>
           </div>

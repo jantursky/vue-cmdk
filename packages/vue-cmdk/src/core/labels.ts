@@ -22,6 +22,11 @@ export const DEFAULT_LABELS: Readonly<PaletteLabels> = {
   resultsOne: '{count} result',
   capped: 'first {shown} of {matched}',
   forgotten: 'Removed {label} from recent',
+  confirm: 'Press Enter again to confirm',
+  pinned: 'Pinned',
+  pin: 'Pinned {label}',
+  unpin: 'Unpinned {label}',
+  argumentEmpty: 'Type a value',
 }
 
 export const fillLabel = (template: string, values: Readonly<Record<string, number | string>>): string =>

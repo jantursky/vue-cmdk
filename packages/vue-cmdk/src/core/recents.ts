@@ -58,13 +58,15 @@ export const resolveRecents = (
   commands: readonly Command[],
   display = RECENTS_DISPLAY,
   now = Date.now(),
+  /** Ids to leave out, e.g. the pinned ones. They do not count toward `display`. */
+  exclude?: ReadonlySet<string>,
 ): Command[] => {
   const byId = indexCommands(commands)
   const out: Command[] = []
   for (const entry of rankRecents(entries, now)) {
     if (out.length >= display) break
     const command = byId.get(entry.id)
-    if (command !== undefined && isTrackable(command)) out.push(command)
+    if (command !== undefined && isTrackable(command) && exclude?.has(entry.id) !== true) out.push(command)
   }
   return out
 }

@@ -1,3 +1,4 @@
+import type { PinsOptions } from '../composables/usePins'
 import type { RecentsOptions } from '../composables/useRecents'
 import type {
   ActivationMode,
@@ -23,6 +24,8 @@ export interface CommandPaletteProps {
   filter?: FilterFn
   /** `false` disables recents. Default: enabled, stored in `localStorage`. */
   recents?: RecentsOptions | boolean
+  /** `true` or options turn on pinned commands, toggled with Mod+D. Default off. */
+  pins?: PinsOptions | boolean
   /** Cmd/Ctrl+1–9. Default true. */
   quickSelect?: boolean
   /** The band under the list describing the selected command. Default false. */
@@ -69,6 +72,12 @@ export interface ItemSlotProps {
   reason: string | null
   /** Quick-select digit, or null. */
   digit: number | null
+  /** The row waits for a second activation; `prompt` says what to confirm. */
+  armed: boolean
+  /** The text of the armed row's prompt, or null when it isn't armed. */
+  prompt: string | null
+  /** The command is pinned. */
+  pinned: boolean
 }
 
 export interface CommandPaletteSlots {

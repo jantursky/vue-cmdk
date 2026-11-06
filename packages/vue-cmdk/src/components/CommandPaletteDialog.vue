@@ -4,12 +4,14 @@ import { computed, inject, nextTick, useTemplateRef, watch } from 'vue'
 import { useCommandShortcuts } from '../composables/useCommandShortcuts'
 import { useFocusTrap } from '../composables/useFocusTrap'
 import { useHotkey } from '../composables/useHotkey'
+import { editStoredPins, pinsOptionsOf } from '../composables/usePins'
 import { editStoredRecents, recentsOptionsOf } from '../composables/useRecents'
 import { useScrollLock } from '../composables/useScrollLock'
 import { followLink } from '../core/activate'
 import { isDev } from '../core/dev'
 import { chordId, isEditableTarget, matchesChord, parseChord } from '../core/keys'
 import { DEFAULT_LABELS } from '../core/labels'
+import { addPin, removePin, togglePin } from '../core/pins'
 import { forgetRecent } from '../core/recents'
 import type { Command } from '../core/types'
 import { COMMAND_REGISTRY_KEY } from '../registry'
@@ -47,8 +49,12 @@ const panel = useTemplateRef<HTMLElement>('panel')
 const palette = useTemplateRef<{
   focus: () => void
   activate: (command: Command) => Promise<void>
+  arm: (command: Command) => boolean
   forgetRecent: (id: string) => void
   clearRecents: () => void
+  pin: (id: string) => void
+  unpin: (id: string) => void
+  togglePin: (id: string) => void
 }>('palette')
 
 const paletteProps = computed<CommandPaletteProps>(() => ({
@@ -58,6 +64,7 @@ const paletteProps = computed<CommandPaletteProps>(() => ({
   maxResults: props.maxResults,
   filter: props.filter,
   recents: props.recents,
+  pins: props.pins,
   quickSelect: props.quickSelect,
   showDetail: props.showDetail,
   labels: props.labels,
@@ -114,13 +121,20 @@ const shortcutCommands = computed<readonly Command[]>(() => [
 
 /**
  * Runs a command from its shortcut while the dialog is closed, as the palette would
- * on Enter. Recents are not touched: a shortcut means the user already knows the command.
+ * on Enter. A page, a command with `argument` or one with `confirm` opens the dialog instead. Recents are not touched: a shortcut means the user already knows the command.
  */
 const runShortcut = async (command: Command): Promise<void> => {
-  if (command.kind === 'page') {
+  if (command.kind === 'page' || (command.kind === 'action' && command.argument !== undefined)) {
+    // A page opens, and an argument command opens its input step: neither runs before the user does.
     open.value = true
     await nextTick()
     await palette.value?.activate(command)
+    return
+  }
+  if (command.confirm !== undefined && command.confirm !== false) {
+    open.value = true
+    await nextTick()
+    palette.value?.arm(command)
     return
   }
   emit('select', command, 'primary')
@@ -173,6 +187,18 @@ defineExpose({
   clearRecents: (): void => {
     if (palette.value === null) editStoredRecents(recentsOptionsOf(props.recents), () => [])
     else palette.value.clearRecents()
+  },
+  pin: (id: string): void => {
+    if (palette.value === null) editStoredPins(pinsOptionsOf(props.pins), (ids) => addPin(ids, id))
+    else palette.value.pin(id)
+  },
+  unpin: (id: string): void => {
+    if (palette.value === null) editStoredPins(pinsOptionsOf(props.pins), (ids) => removePin(ids, id))
+    else palette.value.unpin(id)
+  },
+  togglePin: (id: string): void => {
+    if (palette.value === null) editStoredPins(pinsOptionsOf(props.pins), (ids) => togglePin(ids, id))
+    else palette.value.togglePin(id)
   },
 })
 </script>

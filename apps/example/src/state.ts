@@ -6,6 +6,8 @@ export type ThemeChoice = 'system' | 'light' | 'dark'
 export const app = reactive({
   route: '/',
   language: 'English',
+  /** What the rename command changes, so its typed argument is visible on the page. */
+  fileName: 'draft.md',
   theme: 'system',
   wireframe: false,
   rulers: false,

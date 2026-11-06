@@ -141,6 +141,37 @@ export const commands: Command[] = [
     alternateLabel: 'Open in new tab',
   },
   {
+    kind: 'action',
+    id: 'action:rename',
+    label: 'Rename file…',
+    icon: IconCopy,
+    group: 'Actions',
+    scope: 'actions',
+    hint: 'Asks for a new name, then applies it.',
+    keywords: ['name', 'argument', 'input'],
+    argument: {
+      placeholder: 'New file name',
+      initial: 'draft.md',
+      validate: (value) => (value.includes('/') ? 'A name cannot contain a slash' : null),
+    },
+    perform: ({ value }) => {
+      app.fileName = value ?? app.fileName
+      logAction(`Renamed the file to ${app.fileName}`)
+    },
+  },
+  {
+    kind: 'action',
+    id: 'action:delete',
+    label: 'Delete project',
+    icon: IconBug,
+    group: 'Actions',
+    scope: 'actions',
+    hint: 'Asks for a second Enter before it runs. Nothing is really deleted.',
+    keywords: ['remove', 'confirm', 'destructive'],
+    confirm: 'Press Enter again to delete',
+    perform: () => logAction('Deleted the project (pretend)'),
+  },
+  {
     kind: 'page',
     id: 'action:language',
     label: 'Switch language…',
@@ -226,6 +257,7 @@ export const commands: Command[] = [
         wireframe: false,
         rulers: false,
         language: 'English',
+        fileName: 'draft.md',
         theme: 'system',
         log: [],
       })

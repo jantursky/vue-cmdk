@@ -155,6 +155,46 @@ describe('Escape', () => {
   })
 })
 
+describe('Escape with confirmation and arguments', () => {
+  const typeInto = async (value: string) => {
+    const field = input()!
+    field.value = value
+    field.dispatchEvent(new Event('input'))
+    await nextTick()
+  }
+
+  it('disarms first and keeps the query', async () => {
+    render({ commands: [action('del', 'Delete project', { confirm: true })] })
+    press({ key: 'k', ...mod() })
+    await flush()
+    await typeInto('del')
+    press({ key: 'Enter' }, input()!)
+    await nextTick()
+    expect(document.querySelector('[data-armed="true"]')).not.toBeNull()
+
+    press({ key: 'Escape' }, input()!)
+    await nextTick()
+    expect(document.querySelector('[data-armed="true"]')).toBeNull()
+    expect(input()!.value).toBe('del')
+    expect(dialog()).not.toBeNull()
+  })
+
+  it('leaves the argument step and stays open', async () => {
+    render({ commands: [action('rename', 'Alter name', { argument: {} }), action('b', 'Beta')] })
+    press({ key: 'k', ...mod() })
+    await flush()
+    press({ key: 'Enter' }, input()!)
+    await nextTick()
+    expect(document.querySelectorAll('[data-cmdk-item]')).toHaveLength(1)
+
+    press({ key: 'Escape' }, input()!)
+    await nextTick()
+    expect(dialog()).not.toBeNull()
+    expect(document.querySelectorAll('[data-cmdk-item]').length).toBe(2)
+    expect(document.querySelector('[data-cmdk-breadcrumb]')).toBeNull()
+  })
+})
+
 describe('focus and scroll', () => {
   it('focuses the field on open and restores focus on close', async () => {
     render()
@@ -415,6 +455,48 @@ describe('bound shortcuts', () => {
     expect(dialog()?.textContent).not.toContain('Switch language…')
   })
 
+  it('opens a confirm command armed without running it', async () => {
+    const perform = vi.fn()
+    const wrapper = render({
+      commands: [
+        action('a', 'Alpha'),
+        action('del', 'Delete project', { confirm: 'Press Enter again to delete', shortcut: 'mod+shift+x', perform }),
+      ],
+      bindShortcuts: true,
+    })
+    press({ key: 'X', shiftKey: true, ...mod() })
+    await flush()
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([true])
+    expect(perform).not.toHaveBeenCalled()
+    expect(wrapper.emitted('select')).toBeUndefined()
+    const armed = document.querySelector('[data-cmdk-item][data-armed="true"]')
+    expect(armed?.textContent).toContain('Delete project')
+    expect(armed?.textContent).toContain('Press Enter again to delete')
+    expect(document.querySelector('[data-selected="true"]')).toBe(armed)
+
+    press({ key: 'Enter' }, input()!)
+    await flush()
+    expect(perform).toHaveBeenCalledTimes(1)
+  })
+
+  it('opens an argument command in its argument step', async () => {
+    const perform = vi.fn()
+    const wrapper = render({
+      commands: [
+        action('line', 'Go to line', { argument: { placeholder: 'Line number' }, shortcut: 'ctrl+g', perform }),
+        action('a', 'Alpha'),
+      ],
+      bindShortcuts: true,
+    })
+    press({ key: 'g', ctrlKey: true })
+    await flush()
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([true])
+    expect(perform).not.toHaveBeenCalled()
+    expect(input()?.getAttribute('placeholder')).toBe('Line number')
+    expect(document.querySelectorAll('[data-cmdk-item]')).toHaveLength(1)
+    expect(document.querySelector('[data-cmdk-breadcrumb-row]')?.textContent).toContain('Go to line')
+  })
+
   it('emits error when the handler throws', async () => {
     const boom = new Error('boom')
     const failing = action('f', 'Fail', {
@@ -500,5 +582,66 @@ describe('bound shortcuts', () => {
     press({ key: 'k', ...mod() })
     await flush()
     expect(perform).not.toHaveBeenCalled()
+  })
+})
+
+describe('pins on the dialog', () => {
+  const memory = (initial: string[] = []) => {
+    let ids = initial
+    return { load: () => ids, save: (next: readonly string[]) => void (ids = [...next]), get: () => ids }
+  }
+
+  it('shows the Pinned group and toggles with Mod+D inside the open dialog', async () => {
+    const storage = memory(['b'])
+    render({ pins: { storage } })
+    press({ key: 'k', ...mod() })
+    await flush()
+    expect(document.querySelector('[data-cmdk-group-heading]')?.textContent).toContain('Pinned')
+    expect(document.querySelector('[data-cmdk-item][data-pinned="true"]')?.textContent).toContain('Beta')
+    const event = press({ code: 'KeyD', key: 'd', ...mod() }, input()!)
+    await nextTick()
+    // The first row is pinned Beta, so the chord unpins it; a second press pins the row now first.
+    expect(event.defaultPrevented).toBe(true)
+    expect(storage.get()).toEqual([])
+    expect(document.querySelector('[data-cmdk-item][data-pinned="true"]')).toBeNull()
+    press({ code: 'KeyD', key: 'd', ...mod() }, input()!)
+    await nextTick()
+    expect(storage.get()).toHaveLength(1)
+  })
+
+  it('leaves Mod+D alone when pins are off', async () => {
+    render()
+    press({ key: 'k', ...mod() })
+    await flush()
+    expect(press({ code: 'KeyD', key: 'd', ...mod() }, input()!).defaultPrevented).toBe(false)
+  })
+
+  it('exposes pin, unpin and togglePin, editing storage directly while closed', () => {
+    const storage = memory(['a'])
+    const wrapper = render({ pins: { storage } })
+    const exposed = wrapper.vm as unknown as {
+      pin: (id: string) => void
+      unpin: (id: string) => void
+      togglePin: (id: string) => void
+    }
+    exposed.pin('b')
+    expect(storage.get()).toEqual(['a', 'b'])
+    exposed.unpin('a')
+    expect(storage.get()).toEqual(['b'])
+    exposed.togglePin('b')
+    expect(storage.get()).toEqual([])
+    exposed.togglePin('a')
+    expect(storage.get()).toEqual(['a'])
+  })
+
+  it('edits the live list while open', async () => {
+    const storage = memory()
+    const wrapper = render({ pins: { storage } })
+    press({ key: 'k', ...mod() })
+    await flush()
+    ;(wrapper.vm as unknown as { pin: (id: string) => void }).pin('b')
+    await nextTick()
+    expect(document.querySelector('[data-cmdk-item][data-pinned="true"]')?.textContent).toContain('Beta')
+    expect(storage.get()).toEqual(['b'])
   })
 })
