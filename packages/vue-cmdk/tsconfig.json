@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "types": ["node"],
-    "noEmit": true
+    "noEmit": true,
+    "paths": { "vue-cmdk-palette": ["./src/index.ts"] }
   },
   "include": [
     "src/**/*.ts",

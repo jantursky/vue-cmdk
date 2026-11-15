@@ -2,6 +2,13 @@
 
 All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-11-15
+
+### Added
+
+- `results` and `searching` props and composable options: commands matched elsewhere (a server, say) are listed after the local matches on the root page, without the built-in or custom filter, and `searching` keeps the loading state instead of the empty one while no row is listed.
+- New entry `vue-cmdk-palette/sources` with `useCommandSources(query, sources, options)`: debounced, minimum length, per-source limit and default group, aborted stale requests, a small per-source cache and per-source error isolation. The entry has its own 2 kB size budget.
+
 ## [1.4.0] - 2026-11-06
 
 ### Added
@@ -99,6 +106,7 @@ The first version.
 - Replaceable labels for every built-in string.
 - An optional theme at `vue-cmdk-palette/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
 
+[1.5.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.5.0
 [1.4.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.4.0
 [1.3.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.3.0
 [1.2.2]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.2.2

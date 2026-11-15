@@ -687,3 +687,58 @@ describe('exposed state', () => {
     expect(warn).toHaveBeenCalledTimes(3)
   })
 })
+
+describe('externally matched results', () => {
+  const local = [action('join', 'Join meeting')]
+  const remote = [action('p1', 'Jonathan Smith', { group: 'People' })]
+
+  it('lists results after the local matches and keeps them out of an empty query', async () => {
+    const results = ref<Command[]>(remote)
+    const palette = setup({ commands: local, results })
+    expect(palette.list.value.rows.map((r) => r.label.map((s) => s.text).join(''))).toEqual(['Join meeting'])
+    palette.query.value = 'jo'
+    await nextTick()
+    expect(palette.list.value.rows.map((r) => r.command.id)).toEqual(['join', 'p1'])
+  })
+
+  it('shows the loading state instead of empty while searching with no rows', async () => {
+    const searching = ref(true)
+    const palette = setup({ commands: local, searching })
+    palette.query.value = 'zzz'
+    await nextTick()
+    expect(palette.loading.value).toBe(true)
+    expect(palette.listAttrs.value['aria-busy']).toBe('true')
+    expect(palette.announcement.value).toBe(palette.labels.value.loading)
+    searching.value = false
+    await nextTick()
+    expect(palette.loading.value).toBe(false)
+    expect(palette.announcement.value).toBe(palette.labels.value.empty)
+  })
+
+  it('keeps rows visible and the selection put while searching, then when rows are appended', async () => {
+    const results = ref<Command[]>([])
+    const searching = ref(true)
+    const palette = setup({ commands: [action('a', 'Alpha'), action('b', 'Alpine')], results, searching })
+    palette.query.value = 'al'
+    await nextTick()
+    palette.move(1)
+    expect(palette.loading.value).toBe(false)
+    expect(palette.listAttrs.value['aria-busy']).toBe('true')
+    expect(palette.selected.value?.command.id).toBe('b')
+    results.value = [action('r', 'Allan')]
+    await nextTick()
+    expect(palette.selected.value?.command.id).toBe('b')
+    expect(palette.list.value.rows).toHaveLength(3)
+  })
+
+  it('ignores results on a child page', async () => {
+    const palette = setup({
+      commands: [page('p', 'Open', [action('c', 'Child one')])],
+      results: [action('r', 'Child remote')],
+    })
+    await palette.activate(palette.list.value.rows[0])
+    palette.query.value = 'child'
+    await nextTick()
+    expect(palette.list.value.rows.map((r) => r.command.id)).toEqual(['c'])
+  })
+})

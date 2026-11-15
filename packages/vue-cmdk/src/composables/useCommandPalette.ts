@@ -60,6 +60,13 @@ export interface UseCommandPaletteOptions {
    * it reactive (a getter would be ambiguous with the filter itself).
    */
   readonly filter?: FilterFn | Ref<FilterFn | undefined>
+  /**
+   * Commands already matched for the current query (by a server, say). Listed after
+   * the local matches on the root page, without the built-in or custom filter.
+   */
+  readonly results?: MaybeRefOrGetter<readonly Command[] | undefined>
+  /** Whether `results` are still on the way. Keeps the loading state, not the empty one, while no row is listed. */
+  readonly searching?: MaybeRefOrGetter<boolean | undefined>
   /** `false` disables recents entirely. Default: enabled with `localStorage`. */
   readonly recents?: MaybeRefOrGetter<RecentsOptions | boolean | undefined>
   /** `true` or options turn on pinned commands. Default off. */
@@ -96,7 +103,7 @@ export interface UseCommandPaletteReturn {
   readonly scopes: ComputedRef<readonly Scope[]>
   readonly pages: Readonly<ShallowRef<readonly OpenPage[]>>
   readonly currentPage: ComputedRef<OpenPage | undefined>
-  readonly loading: Readonly<Ref<boolean>>
+  readonly loading: ComputedRef<boolean>
   readonly list: ComputedRef<PaletteList>
   /** The enabled rows, in drawn order: the ring the selection walks. */
   readonly reachable: ComputedRef<readonly RankedRow[]>
@@ -184,7 +191,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
   const query = options.query ?? ref('')
   const scope = ref<ScopeChoice>(null)
   const pages = shallowRef<readonly OpenPage[]>([])
-  const loading = ref(false)
+  const pageLoading = ref(false)
   const cursor = ref(0)
   // The raw states. `armed` and `argumentCommand` below are what the rest reads.
   const armedState = shallowRef<Command | null>(null)
@@ -256,12 +263,21 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
       groupOrder: toValue(options.groupOrder),
       maxResults: toValue(options.maxResults),
       filter: filter(),
+      external: page === undefined ? toValue(options.results) : undefined,
       recents: page === undefined ? recents.resolve(commands, new Set(pinned.map((command) => command.id))) : [],
       recentHeading: labels.value.recent,
       pinned,
       pinnedHeading: labels.value.pinned,
     })
   })
+
+  const searching = (): boolean => toValue(options.searching) === true
+  // Loading takes the place of the list only while it has nothing to show.
+  const loading = computed(
+    () =>
+      pageLoading.value ||
+      (searching() && currentPage.value === undefined && argumentState.value === null && list.value.rows.length === 0),
+  )
 
   const disabledReason = (command: Command): string | null => {
     if (command.disabled !== undefined && command.disabled !== false) {
@@ -343,7 +359,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
 
   const reset = (): void => {
     pageToken++
-    loading.value = false
+    pageLoading.value = false
     pages.value = []
     query.value = ''
     scope.value = null
@@ -394,14 +410,14 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
     const mine = ++pageToken
     let items: readonly Command[]
     if (typeof command.children === 'function') {
-      loading.value = true
+      pageLoading.value = true
       try {
         items = await command.children()
       } catch (error) {
         if (mine === pageToken) options.onError?.(error, command)
         return
       } finally {
-        if (mine === pageToken) loading.value = false
+        if (mine === pageToken) pageLoading.value = false
       }
     } else {
       items = command.children
@@ -467,7 +483,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
     }
     if (pages.value.length === 0) return false
     pageToken++
-    loading.value = false
+    pageLoading.value = false
     pages.value = pages.value.slice(0, -1)
     query.value = ''
     return true
@@ -629,7 +645,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
     id: ids.list,
     role: 'listbox',
     'aria-label': labels.value.list,
-    'aria-busy': loading.value ? 'true' : undefined,
+    'aria-busy': pageLoading.value || (searching() && currentPage.value === undefined) ? 'true' : undefined,
   }))
 
   const rowAttrs = (row: RankedRow): Attrs => {
@@ -684,7 +700,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
     scopes,
     pages: shallowReadonly(pages),
     currentPage,
-    loading: shallowReadonly(loading),
+    loading,
     list,
     reachable,
     selected,

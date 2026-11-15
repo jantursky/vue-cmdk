@@ -19,6 +19,7 @@ export default defineConfig(({ command }) => ({
       command === 'serve'
         ? [
             { find: /^vue-cmdk-palette\/style\.css$/, replacement: lib('src/styles/theme.css') },
+            { find: /^vue-cmdk-palette\/sources$/, replacement: lib('src/sources/index.ts') },
             { find: /^vue-cmdk-palette$/, replacement: lib('src/index.ts') },
           ]
         : [],

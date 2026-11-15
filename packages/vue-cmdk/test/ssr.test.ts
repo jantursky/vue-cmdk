@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createSSRApp, defineComponent, h, type Component } from 'vue'
 import { renderToString, type SSRContext } from 'vue/server-renderer'
 
@@ -9,6 +9,7 @@ import {
   useCommandPalette,
   useRegisterCommands,
 } from '../src'
+import { useCommandSources } from '../src/sources'
 import { action, page } from './fixtures'
 
 // Nuxt and other SSR setups render on a server with no `window` or `document`.
@@ -77,5 +78,18 @@ describe('server rendering', () => {
     expect(html).toContain('data-cmdk-root')
     expect(registry.commands.value.map((c) => c.label)).toEqual(['Save draft'])
     expect(html).toContain('Save draft')
+  })
+  it('renders a palette with sources without starting a request', async () => {
+    const search = vi.fn(() => Promise.resolve([action('r', 'Remote')]))
+    const Host = defineComponent({
+      setup() {
+        const { results, searching } = useCommandSources(() => 'remote', [{ id: 's', search }])
+        return () => h(CommandPalette, { commands, results: results.value, searching: searching.value })
+      },
+    })
+    const { html } = await render(Host, {})
+    expect(html).toContain('data-cmdk-root')
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    expect(search).not.toHaveBeenCalled()
   })
 })

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
 import { CommandPaletteDialog, formatChord, isApplePlatform, type Command } from 'vue-cmdk-palette'
+import { useCommandSources } from 'vue-cmdk-palette/sources'
 
 import { commands, groupOrder, scopes } from './commands'
 import CustomItemDemo from './demos/CustomItemDemo.vue'
@@ -8,10 +9,14 @@ import HeadlessDemo from './demos/HeadlessDemo.vue'
 import InlineDemo from './demos/InlineDemo.vue'
 import RegistryDemo from './demos/RegistryDemo.vue'
 import ExamplesSection from './examples/ExamplesSection.vue'
+import { sources } from './people'
 import { app, logAction, logNoResults, type ThemeChoice } from './state'
 
 const version = __VUE_CMDK_VERSION__
 const open = ref(false)
+const query = ref('')
+// Remote results: a simulated people search, debounced, cancelled when stale and cached.
+const { results, searching } = useCommandSources(query, sources, { scopes })
 const palette = useTemplateRef<{ clearRecents: () => void }>('palette')
 const chord = formatChord('mod+k')
 
@@ -202,7 +207,10 @@ const KEYS: [string, string][] = [
     <CommandPaletteDialog
       ref="palette"
       v-model:open="open"
+      v-model:query="query"
       :commands="commands"
+      :results="results"
+      :searching="searching"
       :scopes="scopes"
       :group-order="groupOrder"
       :navigate="navigate"

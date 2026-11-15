@@ -8,6 +8,7 @@ import dts from 'vite-plugin-dts'
 /** Budget per built entry in dist/, minified and gzipped, excluding the stylesheet. */
 const SIZE_BUDGETS: Readonly<Record<string, number>> = {
   'index.js': 14 * 1024,
+  'sources.js': 2 * 1024,
 }
 
 const root = (path: string): string => resolve(import.meta.dirname, path)
@@ -63,7 +64,7 @@ const themeAndBudget = (): Plugin => ({
   async closeBundle() {
     copyFileSync(root('src/styles/theme.css'), root('dist/style.css'))
     // The same declarations, under the extension TypeScript reads as CommonJS for `require`.
-    copyFileSync(root('dist/index.d.ts'), root('dist/index.d.cts'))
+    for (const name of ['index', 'sources']) copyFileSync(root(`dist/${name}.d.ts`), root(`dist/${name}.d.cts`))
     for (const [file, budget] of Object.entries(SIZE_BUDGETS)) {
       const size = await shippedSize(file, readFileSync(root(`dist/${file}`), 'utf8'))
       const report = `${kB(size)} min+gzip (budget ${kB(budget)})`
@@ -87,12 +88,13 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: root('src/index.ts'),
+      entry: { index: root('src/index.ts'), sources: root('src/sources/index.ts') },
       formats: ['es', 'cjs'],
-      fileName: (format) => (format === 'es' ? 'index.js' : 'index.cjs'),
+      fileName: (format, name) => `${name}.${format === 'es' ? 'js' : 'cjs'}`,
     },
     rollupOptions: {
-      external: ['vue'],
+      // The sources entry imports the main entry at install time instead of bundling a copy.
+      external: ['vue', 'vue-cmdk-palette'],
       output: { exports: 'named' },
     },
     sourcemap: true,

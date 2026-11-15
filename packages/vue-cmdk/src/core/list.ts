@@ -21,6 +21,12 @@ export interface BuildListInput {
   /** Already resolved, in pinned order. Shown first for the empty query in no scope. */
   readonly pinned?: readonly Command[]
   readonly pinnedHeading?: string
+  /**
+   * Commands already matched elsewhere (a server), in the order given. Listed after
+   * the local groups for a non-empty query, without filtering or capping. Ids that a
+   * local command already uses are dropped.
+   */
+  readonly external?: readonly Command[]
 }
 
 interface Scored {
@@ -100,16 +106,34 @@ const capped = (groups: readonly RankedGroup[], max: number): RankedGroup[] => {
   return out
 }
 
+/**
+ * Externally matched rows keep the order they arrived in. Each heading gets its own
+ * block, keyed apart from a local group of the same name, so local ranking never
+ * interleaves with the server's.
+ */
+const fileExternal = (commands: readonly Command[], needle: string): RankedGroup[] => {
+  const byGroup = new Map<string, RankedRow[]>()
+  commands.forEach((command, index) => {
+    const key = command.group ?? ''
+    let rows = byGroup.get(key)
+    if (rows === undefined) {
+      rows = []
+      byGroup.set(key, rows)
+    }
+    rows.push(drawRow(command, needle, index))
+  })
+  return [...byGroup].map(([key, rows]) => ({ key: `external:${key}`, heading: key, rows }))
+}
+
 export const buildList = (input: BuildListInput): PaletteList => {
   const scopes = input.scopes ?? []
   const { needle, forced } = parseQuery(input.query, scopes)
   const scope = scopes.length === 0 ? null : (forced ?? input.scope ?? null)
 
   const found = matching(input.commands, needle, input.filter)
-  const counts = countByScope(
-    found.map(({ command }) => command),
-    scopes,
-  )
+  const localIds = new Set(input.commands.map((command) => command.id))
+  const foreign = needle === '' ? [] : (input.external ?? []).filter((command) => !localIds.has(command.id))
+  const counts = countByScope([...found.map(({ command }) => command), ...foreign], scopes)
   const inScope = scope === null ? found : found.filter(({ command }) => command.scope === scope)
 
   // Pinned and recent rows lead the empty query in no scope, pinned first. They are
@@ -144,18 +168,21 @@ export const buildList = (input: BuildListInput): PaletteList => {
   const filed = fileUnderHeadings(rest, needle, input.commands, input.groupOrder ?? [])
   // The empty query is the answer to "what does this hold", so it is never cut.
   const groups = needle === '' ? filed : capped(filed, input.maxResults ?? MAX_RESULTS)
+  const foreignInScope = scope === null ? foreign : foreign.filter((command) => command.scope === scope)
+  const foreignGroups = fileExternal(foreignInScope, needle)
   const all = [
     ...(pinnedGroup === null ? [] : [pinnedGroup]),
     ...(recentGroup === null ? [] : [recentGroup]),
     ...groups,
+    ...foreignGroups,
   ]
 
   return {
     groups: all,
     rows: all.flatMap((group) => group.rows),
-    matched: inScope.length,
+    matched: inScope.length + foreignInScope.length,
     counts,
-    total: found.length,
+    total: found.length + foreign.length,
     needle,
     scope,
   }

@@ -1,6 +1,6 @@
 {
   "name": "vue-cmdk-palette",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Lightweight, accessible command palette for Vue 3: headless composable plus a ready-made dialog component.",
   "license": "MIT",
   "author": {
@@ -30,6 +30,16 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./sources": {
+      "import": {
+        "types": "./dist/sources.d.ts",
+        "default": "./dist/sources.js"
+      },
+      "require": {
+        "types": "./dist/sources.d.cts",
+        "default": "./dist/sources.cjs"
       }
     },
     "./style.css": "./dist/style.css",

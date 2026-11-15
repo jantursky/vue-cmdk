@@ -28,6 +28,8 @@ const palette = useCommandPalette({
   groupOrder: () => props.groupOrder,
   maxResults: () => props.maxResults,
   filter: toRef(props, 'filter'),
+  results: () => props.results,
+  searching: () => props.searching,
   recents: () => props.recents,
   pins: () => props.pins,
   quickSelect: () => props.quickSelect,

@@ -9,6 +9,7 @@ export default defineMeta({
     'registry-and-shortcuts',
     'nested-pages',
     'search',
+    'remote-search',
     'scopes',
     'recents',
     'pins',

@@ -22,6 +22,10 @@ export interface CommandPaletteProps {
   maxResults?: number
   /** Replaces the built-in substring matching. */
   filter?: FilterFn
+  /** Commands already matched for the query (by a server), listed after the local matches without filtering. */
+  results?: readonly Command[]
+  /** Whether `results` are still on the way: keeps the loading state, not the empty one, while no row is listed. */
+  searching?: boolean
   /** `false` disables recents. Default: enabled, stored in `localStorage`. */
   recents?: RecentsOptions | boolean
   /** `true` or options turn on pinned commands, toggled with Mod+D. Default off. */

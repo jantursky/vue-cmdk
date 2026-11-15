@@ -231,4 +231,57 @@ describe('buildList pinned and recent groups', () => {
     const list = buildList({ commands: COMMANDS, query: '', pinned: [byId('colors')] })
     expect(list.rows).toHaveLength(COMMANDS.filter((c) => c.hidden !== true).length)
   })
+  describe('externally matched results', () => {
+    const people = [
+      action('p1', 'Jonathan Smith', { group: 'People', scope: 'tools' }),
+      action('p2', 'John Doe', { group: 'People', scope: 'run' }),
+    ]
+
+    it('lists them after the local groups, unfiltered, highlighted where the query occurs', () => {
+      const local = [action('join', 'Join meeting', { group: 'Meetings' })]
+      const list = buildList({ commands: local, query: 'jo', external: people })
+      expect(list.groups.map((g) => g.heading)).toEqual(['Meetings', 'People'])
+      expect(labels(list.rows)).toEqual(['Join meeting', 'Jonathan Smith', 'John Doe'])
+      expect(list.rows[1]?.label.some((segment) => segment.hit)).toBe(true)
+    })
+
+    it('keeps a server result the substring filter would reject', () => {
+      const list = buildList({ commands: [], query: 'jhn', external: people })
+      expect(labels(list.rows)).toEqual(['Jonathan Smith', 'John Doe'])
+    })
+
+    it('ignores them for an empty query', () => {
+      const list = buildList({ commands: COMMANDS, query: '', external: people })
+      expect(labels(list.rows)).not.toContain('John Doe')
+    })
+
+    it('drops a result whose id a local command already uses', () => {
+      const list = buildList({
+        commands: [action('p1', 'Local p1')],
+        query: 'p',
+        external: [action('p1', 'Remote p1')],
+      })
+      expect(labels(list.rows)).toEqual(['Local p1'])
+    })
+
+    it('respects the scope and counts toward scope counts', () => {
+      const all = buildList({ commands: [], query: 'jo', external: people, scopes: SCOPES })
+      expect(all.counts).toMatchObject({ tools: 1, run: 1 })
+      expect(all.total).toBe(2)
+      const run = buildList({ commands: [], query: '>jo', external: people, scopes: SCOPES })
+      expect(labels(run.rows)).toEqual(['John Doe'])
+    })
+
+    it('keeps a group that shares a local heading in its own block, after the local one', () => {
+      const local = [action('a', 'Joan', { group: 'People' })]
+      const list = buildList({ commands: local, query: 'jo', external: [action('x', 'Jordan', { group: 'People' })] })
+      expect(list.groups.map((g) => g.key)).toEqual(['group:People', 'external:People'])
+    })
+
+    it('does not cap them', () => {
+      const many = Array.from({ length: 60 }, (_, i) => action(`e${i}`, `Person ${i}`))
+      const list = buildList({ commands: [], query: 'person', external: many, maxResults: 5 })
+      expect(list.rows).toHaveLength(60)
+    })
+  })
 })

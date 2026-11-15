@@ -63,6 +63,8 @@ const paletteProps = computed<CommandPaletteProps>(() => ({
   groupOrder: props.groupOrder,
   maxResults: props.maxResults,
   filter: props.filter,
+  results: props.results,
+  searching: props.searching,
   recents: props.recents,
   pins: props.pins,
   quickSelect: props.quickSelect,

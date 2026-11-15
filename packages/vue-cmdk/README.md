@@ -35,6 +35,8 @@ bun add vue-cmdk-palette
 
 `vue-cmdk` requires Vue `^3.5`.
 
+Remote search lives in its own entry, `vue-cmdk-palette/sources`, so apps that don't need it don't pay for it.
+
 ## Quick start
 
 ```vue
@@ -155,6 +157,35 @@ If you want a different matcher, pass a `filter`. It returns `null` for no match
 const filter: FilterFn = (command, needle) => (command.label.startsWith(needle) ? 0 : null)
 ```
 
+### Remote search
+
+Results that live behind an API go through `useCommandSources` from `vue-cmdk-palette/sources`. It debounces the query, aborts stale requests, caches recent answers and keeps one failing source from hiding the others. Pass its `results` and `searching` to the palette: the results are listed after the local matches, without the built-in filter.
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useCommandSources } from 'vue-cmdk-palette/sources'
+
+const query = ref('')
+const { results, searching } = useCommandSources(query, [
+  {
+    id: 'people',
+    group: 'People',
+    search: async (q, { signal }) => {
+      const people = await (await fetch(`/api/people?q=${encodeURIComponent(q)}`, { signal })).json()
+      return people.map((p) => ({ kind: 'action', id: `person:${p.id}`, label: p.name, perform: () => open(p) }))
+    },
+  },
+])
+</script>
+
+<template>
+  <CommandPaletteDialog v-model:query="query" :commands="commands" :results="results" :searching="searching" />
+</template>
+```
+
+Each source takes `debounce` (200 ms), `minLength` (2) and `limit` (10), and a `group` for results that have none.
+
 ## Scopes
 
 ```ts
@@ -254,30 +285,32 @@ The attribute getters (`fieldAttrs`, `listAttrs`, `rowAttrs`, `groupAttrs`, `chi
 
 `<CommandPalette>` renders the palette inline. `<CommandPaletteDialog>` accepts the same props and adds modal behavior.
 
-| prop             | default           |                                                              |
-| ---------------- | ----------------- | ------------------------------------------------------------ |
-| `commands`       | `[]`              | Listed before commands registered by components.             |
-| `scopes`         | `[]`              |                                                              |
-| `group-order`    | declaration order | Heading order for an empty query.                            |
-| `max-results`    | `40`              | The total number of rows drawn for a non-empty query.        |
-| `filter`         | built-in          |                                                              |
-| `recents`        | `true`            | `false`, `true`, or `RecentsOptions`.                        |
-| `pins`           | `false`           | `false`, `true`, or `PinsOptions`.                           |
-| `quick-select`   | `true`            | ⌘/Ctrl+1-9.                                                  |
-| `show-detail`    | `false`           | The band below the list that describes the selected row.     |
-| `labels`         | English           | Every built-in string. Pass any subset of `PaletteLabels`.   |
-| `navigate`       | `location.href`   | A router hook for `link` commands.                           |
-| `chord`          | dialog: `hotkey`  | The chord printed in the footer.                             |
-| `autofocus`      | `true`            |                                                              |
-| `v-model:query`  | `''`              |                                                              |
-| **dialog only**  |                   |                                                              |
-| `v-model:open`   | `false`           |                                                              |
-| `hotkey`         | `'mod+k'`         | `false` disables the global chord.                           |
-| `open-on-slash`  | `false`           | `/` opens the palette when focus is not in a field.          |
-| `dismissible`    | `true`            | A backdrop click closes the palette.                         |
-| `to`             | `'body'`          | The Teleport target.                                         |
-| `trap-focus`     | `true`            |                                                              |
-| `bind-shortcuts` | `false`           | Run a command from its chord-string `shortcut` while closed. |
+| prop             | default           |                                                                             |
+| ---------------- | ----------------- | --------------------------------------------------------------------------- |
+| `commands`       | `[]`              | Listed before commands registered by components.                            |
+| `scopes`         | `[]`              |                                                                             |
+| `group-order`    | declaration order | Heading order for an empty query.                                           |
+| `max-results`    | `40`              | The total number of rows drawn for a non-empty query.                       |
+| `filter`         | built-in          |                                                                             |
+| `results`        | none              | Commands already matched for the query, listed after the local matches.     |
+| `searching`      | `false`           | Keeps the loading state, not the empty one, while `results` are on the way. |
+| `recents`        | `true`            | `false`, `true`, or `RecentsOptions`.                                       |
+| `pins`           | `false`           | `false`, `true`, or `PinsOptions`.                                          |
+| `quick-select`   | `true`            | ⌘/Ctrl+1-9.                                                                 |
+| `show-detail`    | `false`           | The band below the list that describes the selected row.                    |
+| `labels`         | English           | Every built-in string. Pass any subset of `PaletteLabels`.                  |
+| `navigate`       | `location.href`   | A router hook for `link` commands.                                          |
+| `chord`          | dialog: `hotkey`  | The chord printed in the footer.                                            |
+| `autofocus`      | `true`            |                                                                             |
+| `v-model:query`  | `''`              |                                                                             |
+| **dialog only**  |                   |                                                                             |
+| `v-model:open`   | `false`           |                                                                             |
+| `hotkey`         | `'mod+k'`         | `false` disables the global chord.                                          |
+| `open-on-slash`  | `false`           | `/` opens the palette when focus is not in a field.                         |
+| `dismissible`    | `true`            | A backdrop click closes the palette.                                        |
+| `to`             | `'body'`          | The Teleport target.                                                        |
+| `trap-focus`     | `true`            |                                                                             |
+| `bind-shortcuts` | `false`           | Run a command from its chord-string `shortcut` while closed.                |
 
 Events: `select(command, mode)`, `error(error, command)`, `close()` (inline only), `no-results(query, scope)`, `update:open`, `update:query`. `no-results` fires once for a query that matched nothing and stayed unchanged for 500 ms, so you can send it straight to analytics.
 

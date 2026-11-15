@@ -1,0 +1,79 @@
+---
+title: Remote search
+description: List results from an API next to your own commands, with debounce, cancellation and caching.
+---
+
+Some things to find don't belong in the `commands` array: people, documents, tickets. They live behind an API. The palette lists them through two props, and an optional entry, `vue-cmdk-palette/sources`, does the timing for you.
+
+## The two props
+
+`results` is a list of commands that were already matched for the current query. The palette lists them after the local matches on the root page, in the order you give, without the built-in or custom filter, so a fuzzy server match such as `jhn` finding `John Doe` stays. They're grouped by their `group`, respect the active scope, count toward the scope counts, and are highlighted where the query occurs. A result whose id equals a local command's id is dropped.
+
+`searching` says results are on the way. While it's `true` and no row is listed, the palette shows its loading state, not "Nothing matches", and the list is marked `aria-busy`. Rows that are already listed stay visible and selectable.
+
+Both props are ignored inside a child page.
+
+## `useCommandSources`
+
+```vue
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useCommandSources } from 'vue-cmdk-palette/sources'
+
+const query = ref('')
+const { results, searching, errors } = useCommandSources(
+  query,
+  [
+    {
+      id: 'people',
+      group: 'People',
+      limit: 8,
+      search: async (q, { signal }) => {
+        const response = await fetch(`/api/people?q=${encodeURIComponent(q)}`, { signal })
+        return (await response.json()).map((person) => ({
+          kind: 'link',
+          id: `person:${person.id}`,
+          label: person.name,
+          href: `/people/${person.id}`,
+        }))
+      },
+    },
+  ],
+  { onError: (error, source) => report(source.id, error) },
+)
+</script>
+
+<template>
+  <CommandPaletteDialog v-model:query="query" :commands="commands" :results="results" :searching="searching" />
+</template>
+```
+
+Each source has:
+
+| option      | default | meaning                                                          |
+| ----------- | ------- | ---------------------------------------------------------------- |
+| `id`        | none    | Unique among the sources. Keys the errors and the cache.         |
+| `search`    | none    | `(query, { signal, scope }) => Promise<Command[]>`.              |
+| `debounce`  | `200`   | Milliseconds the query must stay unchanged before searching.     |
+| `minLength` | `2`     | Shorter queries aren't sent, and the source contributes nothing. |
+| `limit`     | `10`    | The most results kept.                                           |
+| `group`     | none    | Heading for results that have no `group` of their own.           |
+
+The options as the third argument:
+
+| option    | default | meaning                                                                          |
+| --------- | ------- | -------------------------------------------------------------------------------- |
+| `scopes`  | none    | Pass your scopes so a typed prefix such as `>` is removed and read as the scope. |
+| `scope`   | none    | The chip chosen by the user. A typed prefix overrides it.                        |
+| `cache`   | `true`  | Reuse answers for recent queries.                                                |
+| `onError` | none    | Called when a search rejects with something other than an abort.                 |
+
+## Behavior
+
+- **Cancellation.** When the query changes, every pending search is aborted through its `signal`, and a response that still arrives for an old query is discarded. Pass `signal` on to `fetch`.
+- **Previous answers stay.** While the next answer is on the way the previous one stays listed and `searching` is `true`, so the list doesn't flash.
+- **Errors are isolated.** A rejecting source contributes nothing and shows up in `errors` under its id, until its next search succeeds. Other sources are not affected. Aborts are never errors.
+- **Cache.** Each source keeps its 20 most recent answers per scope and query, so deleting back to an earlier query shows its results without another request. Turn it off with `cache: false`.
+- **Server rendering.** Nothing is requested on the server.
+
+Remote commands aren't restored in recents or pins after a reload, since only ids are stored. An id that doesn't resolve is skipped, as for any stale id.

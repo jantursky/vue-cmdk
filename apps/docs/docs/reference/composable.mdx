@@ -13,24 +13,26 @@ const palette = useCommandPalette({ commands, scopes, onSelect: (command) => con
 
 Options marked "ref or getter" accept a plain value, a `ref`, or a getter function, and stay reactive.
 
-| option        | type                                       | notes                                                                |
-| ------------- | ------------------------------------------ | -------------------------------------------------------------------- |
-| `commands`    | `Command[]`, ref or getter                 | Default `[]`. Listed before the registry's commands.                 |
-| `registry`    | `CommandRegistry`                          | Commands contributed by mounted components, listed after `commands`. |
-| `scopes`      | `Scope[]`, ref or getter                   |                                                                      |
-| `groupOrder`  | `string[]`, ref or getter                  | Heading order for the empty query.                                   |
-| `maxResults`  | `number`, ref or getter                    | Default `40`.                                                        |
-| `filter`      | `FilterFn` or a ref of one                 | A getter isn't accepted here, since a filter is itself a function.   |
-| `recents`     | `RecentsOptions \| boolean`, ref or getter | Default `true`.                                                      |
-| `pins`        | `PinsOptions \| boolean`, ref or getter    | Default `false`.                                                     |
-| `quickSelect` | `boolean`, ref or getter                   | Default `true`.                                                      |
-| `labels`      | `Partial<PaletteLabels>`, ref or getter    |                                                                      |
-| `query`       | `Ref<string>`                              | Bring your own query state, for example from `defineModel`.          |
-| `navigate`    | `(href) => void`                           | Router hook for `link` commands.                                     |
-| `onSelect`    | `(command, mode) => void`                  |                                                                      |
-| `onError`     | `(error, command) => void`                 |                                                                      |
-| `onClose`     | `() => void`                               | Called when the palette asks to close.                               |
-| `onNoResults` | `(query, scope) => void`                   | A query matched nothing for 500 ms, or at close. Once per query.     |
+| option        | type                                       | notes                                                                        |
+| ------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| `commands`    | `Command[]`, ref or getter                 | Default `[]`. Listed before the registry's commands.                         |
+| `registry`    | `CommandRegistry`                          | Commands contributed by mounted components, listed after `commands`.         |
+| `scopes`      | `Scope[]`, ref or getter                   |                                                                              |
+| `groupOrder`  | `string[]`, ref or getter                  | Heading order for the empty query.                                           |
+| `maxResults`  | `number`, ref or getter                    | Default `40`.                                                                |
+| `filter`      | `FilterFn` or a ref of one                 | A getter isn't accepted here, since a filter is itself a function.           |
+| `results`     | `Command[]`, ref or getter                 | Commands matched elsewhere, listed after the local matches on the root page. |
+| `searching`   | `boolean`, ref or getter                   | Keeps `loading` true, instead of the empty state, while no row is listed.    |
+| `recents`     | `RecentsOptions \| boolean`, ref or getter | Default `true`.                                                              |
+| `pins`        | `PinsOptions \| boolean`, ref or getter    | Default `false`.                                                             |
+| `quickSelect` | `boolean`, ref or getter                   | Default `true`.                                                              |
+| `labels`      | `Partial<PaletteLabels>`, ref or getter    |                                                                              |
+| `query`       | `Ref<string>`                              | Bring your own query state, for example from `defineModel`.                  |
+| `navigate`    | `(href) => void`                           | Router hook for `link` commands.                                             |
+| `onSelect`    | `(command, mode) => void`                  |                                                                              |
+| `onError`     | `(error, command) => void`                 |                                                                              |
+| `onClose`     | `() => void`                               | Called when the palette asks to close.                                       |
+| `onNoResults` | `(query, scope) => void`                   | A query matched nothing for 500 ms, or at close. Once per query.             |
 
 ### State
 

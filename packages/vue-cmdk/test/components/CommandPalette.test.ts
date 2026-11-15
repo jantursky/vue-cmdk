@@ -322,3 +322,18 @@ describe('confirmation and argument rows', () => {
     expect(wrapper.find('input').element.value).toBe('draft.md')
   })
 })
+
+describe('results and searching props', () => {
+  it('lists results after local matches and shows loading instead of empty while searching', async () => {
+    const wrapper = render({ commands: COMMANDS, results: [action('r', 'Copy remote', { group: 'People' })] })
+    await wrapper.get('input').setValue('copy')
+    expect(wrapper.findAll('[role="option"]').map((o) => o.text())).toEqual(
+      expect.arrayContaining([expect.stringContaining('Copy remote')]),
+    )
+
+    await wrapper.setProps({ results: [], searching: true })
+    await wrapper.get('input').setValue('zzz')
+    expect(wrapper.find('[data-cmdk-loading]').exists()).toBe(true)
+    expect(wrapper.get('[role="listbox"]').attributes('aria-busy')).toBe('true')
+  })
+})
