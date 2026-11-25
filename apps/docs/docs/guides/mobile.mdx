@@ -1,0 +1,38 @@
+---
+title: Mobile and touch
+description: How the palette behaves on phones and tablets, with the on-screen keyboard, finger scrolling, key hints and small screens.
+---
+
+The palette is built for keyboards first, and it also works on touch screens. On a phone the on-screen keyboard can cover the list, a finger that scrolls the list could also move the selection, the page behind the dialog could still scroll, and the footer shows key hints nobody can press. The default theme and the components handle each of these.
+
+## The on-screen keyboard
+
+While the dialog is open, the list's height follows the visual viewport. When the keyboard opens, the field stays visible and the list scrolls in the space above the keyboard. Where the browser doesn't expose the visual viewport, the list uses the dynamic viewport height instead.
+
+The search field sets `enterkeyhint="go"`, so the keyboard labels its Enter key Go.
+
+## Finger movement
+
+Hover selection reacts only to a mouse or pen pointer. A finger that drags across rows to scroll the list doesn't change the selection, and a tap on a row still activates it.
+
+## The page behind the dialog
+
+While the dialog is open, a touch drag outside the list doesn't scroll the page behind it. This includes iOS Safari, where `overflow: hidden` on the page doesn't stop touch scrolling by itself.
+
+A drag on the list scrolls the list. When the list reaches its end, the drag stops there, and the page still doesn't move.
+
+[`useScrollLock`](/reference/composable) applies the same lock if you build your own dialog without the component.
+
+## Default theme on touch devices
+
+The default theme adapts to the device:
+
+- On devices whose main pointer can't hover, the footer key hints, the Tab hint for scopes and the quick-select digits are hidden. The result count stays visible.
+- Rows are at least 44 px tall there, so they're easy to tap.
+- On screens up to 520 px wide, the panel spans the width minus a small gutter, anchors near the top, and keeps clear of the top safe-area inset of a notched phone.
+
+A touchscreen laptop still shows the key hints, because its main pointer can hover.
+
+## Custom styles
+
+If you write your own styles, the same behavior comes from the `data-cmdk-*` attributes and the state attributes described in [styling](/guides/styling). The media queries above are part of the default theme only.

@@ -7,3 +7,6 @@ openspec/
 .blume/
 apps/docs/docs/_generated/
 .blume-verify/
+packages/vue-cmdk/test/nuxt/.nuxt/
+packages/vue-cmdk/test/nuxt/.output/
+packages/vue-cmdk/test/nuxt/node_modules/

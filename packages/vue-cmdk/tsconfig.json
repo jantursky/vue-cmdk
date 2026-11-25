@@ -5,11 +5,13 @@
     "noEmit": true,
     "paths": { "vue-cmdk-palette": ["./src/index.ts"] }
   },
+  "exclude": ["test/nuxt"],
   "include": [
     "src/**/*.ts",
     "src/**/*.vue",
     "test/**/*.ts",
     "vite.config.ts",
+    "vite.nuxt.config.ts",
     "vitest.config.ts",
     "vitest.browser.config.ts",
     "vitest.ssr.config.ts"

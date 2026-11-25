@@ -633,6 +633,7 @@ export const useCommandPalette = (options: UseCommandPaletteOptions): UseCommand
     autocapitalize: 'off',
     autocorrect: 'off',
     spellcheck: false,
+    enterkeyhint: 'go',
     placeholder: placeholder.value,
     'aria-label': placeholder.value,
     'aria-expanded': 'true',

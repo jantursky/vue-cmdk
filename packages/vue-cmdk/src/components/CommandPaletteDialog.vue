@@ -7,6 +7,7 @@ import { useHotkey } from '../composables/useHotkey'
 import { editStoredPins, pinsOptionsOf } from '../composables/usePins'
 import { editStoredRecents, recentsOptionsOf } from '../composables/useRecents'
 import { useScrollLock } from '../composables/useScrollLock'
+import { useVisualViewport } from '../composables/useVisualViewport'
 import { followLink } from '../core/activate'
 import { isDev } from '../core/dev'
 import { chordId, isEditableTarget, matchesChord, parseChord } from '../core/keys'
@@ -45,6 +46,7 @@ defineSlots<CommandPaletteSlots>()
 const open = defineModel<boolean>('open', { default: false })
 const query = defineModel<string>('query', { default: '' })
 
+const overlay = useTemplateRef<HTMLElement>('overlay')
 const panel = useTemplateRef<HTMLElement>('panel')
 const palette = useTemplateRef<{
   focus: () => void
@@ -84,6 +86,7 @@ const trap = useFocusTrap(
   () => props.trapFocus,
 )
 useScrollLock(() => open.value)
+useVisualViewport(overlay, () => open.value)
 
 // Closing by any route (chord, backdrop, parent) starts the next open from the root.
 watch(open, (value) => {
@@ -207,7 +210,7 @@ defineExpose({
 
 <template>
   <Teleport :to="to">
-    <div v-if="open" data-cmdk-overlay @pointerdown.self="onBackdrop">
+    <div v-if="open" ref="overlay" data-cmdk-overlay @pointerdown.self="onBackdrop">
       <div ref="panel" role="dialog" aria-modal="true" :aria-label="label" data-cmdk-dialog @keydown="trap.onKeydown">
         <CommandPalette
           ref="palette"

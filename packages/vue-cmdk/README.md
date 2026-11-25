@@ -37,6 +37,8 @@ bun add vue-cmdk-palette
 
 Remote search lives in its own entry, `vue-cmdk-palette/sources`, so apps that don't need it don't pay for it.
 
+In Nuxt, add `vue-cmdk-palette/nuxt` to `modules` instead of registering the components by hand. The module needs Nuxt 3.13 or later and is documented in the [Nuxt guide](https://vue-cmdk-docs.vercel.app/guides/nuxt).
+
 ## Quick start
 
 ```vue
@@ -350,6 +352,8 @@ The theme uses `--cmdk-*` custom properties. Override any of them on `:root` or 
 
 You get the dark theme under `prefers-color-scheme: dark` (unless an ancestor has `[data-theme='light']`) and under any `[data-theme='dark']` ancestor. Animations switch off under `prefers-reduced-motion`.
 
+On touch-only phones the default theme hides the key hints, gives rows at least 44 px of height and uses the full width of small screens. The list height follows the visual viewport while the dialog is open, so an on-screen keyboard shrinks the list instead of covering it.
+
 Skip the stylesheet and nothing is styled. You can write your own CSS against the `data-cmdk-*` attributes and the state attributes `data-selected`, `data-disabled`, and `data-active`.
 
 ## Browser support
@@ -361,6 +365,8 @@ Skip the stylesheet and nothing is styled. You can write your own CSS against th
 | Safari, iOS Safari | 15.4+                     | 16.2+         |
 
 The theme's higher floor comes from `color-mix()`, which tints the selected row and its icon. Older browsers still get a working, readable theme, with a plain highlight in place of the tint. Every change is tested in current Chromium, Firefox and WebKit.
+
+The keyboard-aware height uses `visualViewport`. Where it's missing, the list uses the dynamic viewport height, and the palette works the same otherwise.
 
 ## License
 

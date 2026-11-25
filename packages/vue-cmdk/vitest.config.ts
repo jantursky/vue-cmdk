@@ -10,7 +10,8 @@ export default defineConfig({
     environment: 'happy-dom',
     include: ['test/**/*.test.ts'],
     // Real-browser and server-rendering tests have their own configs: vitest.browser.config.ts, vitest.ssr.config.ts.
-    exclude: ['test/browser/**', 'test/ssr.test.ts'],
+    // The Nuxt fixture links the package into its node_modules, so its copy of the tests would run twice.
+    exclude: ['test/browser/**', 'test/ssr.test.ts', 'test/nuxt/**'],
     passWithNoTests: true,
     coverage: {
       provider: 'v8',

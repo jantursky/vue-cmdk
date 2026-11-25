@@ -71,3 +71,22 @@ jobs:
           node -p "'vue ' + require(require.resolve('vue/package.json', { paths: ['packages/vue-cmdk'] })).version"
       - name: Test
         run: bun run test
+
+  # Installs Nuxt, so it runs as its own job rather than in `check`. It builds the package,
+  # then builds the Nuxt fixture with the built module and checks the server-rendered pages.
+  nuxt:
+    runs-on: ubuntu-latest
+    name: nuxt module
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: bun install --frozen-lockfile
+      - name: Build the package
+        run: bun run build:lib
+      - name: Build and check the Nuxt fixture
+        run: bun run --filter vue-cmdk-palette test:nuxt

@@ -7,7 +7,7 @@ import dts from 'vite-plugin-dts'
 
 /** Budget per built entry in dist/, minified and gzipped, excluding the stylesheet. */
 const SIZE_BUDGETS: Readonly<Record<string, number>> = {
-  'index.js': 14 * 1024,
+  'index.js': 14.25 * 1024,
   'sources.js': 2 * 1024,
 }
 

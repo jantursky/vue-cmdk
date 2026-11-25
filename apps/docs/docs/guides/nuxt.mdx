@@ -1,0 +1,75 @@
+---
+title: Nuxt
+description: Add the palette to a Nuxt app as a module, with components, composables, styles and the command registry set up for you.
+---
+
+The `vue-cmdk-palette/nuxt` module sets up the palette in a Nuxt app from `nuxt.config`, so you don't import the components, the stylesheet or the registry yourself.
+
+## Install
+
+```sh
+bun add vue-cmdk-palette
+```
+
+```ts nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['vue-cmdk-palette/nuxt'],
+})
+```
+
+The module supports Nuxt 3.13 and later, including Nuxt 4. `@nuxt/kit` is an optional peer dependency: only Nuxt apps use it, so a plain Vite app installs no Nuxt packages.
+
+## What it sets up
+
+- `CommandPalette`, `CommandPaletteDialog` and `CommandHighlight` are registered as global components, so you use them without an import.
+- The public composables are auto-imported: `useRegisterCommands`, `useCommandPalette`, `useRecents`, `usePins`, `useCommandShortcuts`, `useHotkey`, `useFocusTrap` and `useScrollLock`. `useCommandSources` is auto-imported from `vue-cmdk-palette/sources`.
+- The theme stylesheet is added to the app's CSS.
+- One command registry is installed per app instance. Each server request gets its own, so commands registered on one request never show up in another.
+
+Put `<CommandPaletteDialog>` in a layout, and commands registered on any page appear in it:
+
+```vue layouts/default.vue
+<template>
+  <div>
+    <CommandPaletteDialog />
+    <slot />
+  </div>
+</template>
+```
+
+```vue pages/reports.vue
+<script setup lang="ts">
+useRegisterCommands([{ id: 'export', kind: 'action', label: 'Export table', perform: () => exportTable() }])
+</script>
+```
+
+The commands are listed while the page is shown and removed when you leave it.
+
+## Options
+
+Set them under the `cmdk` key:
+
+| option     | default | what it does                                                                                        |
+| ---------- | ------- | --------------------------------------------------------------------------------------------------- |
+| `css`      | `true`  | Adds `vue-cmdk-palette/style.css` to the app. Set `false` to style the palette yourself.            |
+| `registry` | `true`  | Installs the command registry that `useRegisterCommands` uses. Set `false` if you install your own. |
+| `prefix`   | `''`    | Prefixes the component names. With `prefix: 'Cmdk'`, the dialog is `<CmdkCommandPaletteDialog>`.    |
+
+```ts nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['vue-cmdk-palette/nuxt'],
+  cmdk: {
+    prefix: 'Cmdk',
+  },
+})
+```
+
+## Server rendering
+
+The closed dialog renders nothing on the server, and it doesn't touch `window`, `document` or `localStorage` until it opens. A page that renders `<CommandPalette>` inline is rendered in full on the server, including the commands it registers.
+
+The module only sets up the app. Your own code still decides what each command does, so the `perform` functions run in the browser, after the page has hydrated.
+
+## Without the module
+
+If you'd rather wire things up yourself, the package works in any Vue app. The [composable](/reference/composable) and the [components](/reference/components) reference cover the same pieces the module registers.

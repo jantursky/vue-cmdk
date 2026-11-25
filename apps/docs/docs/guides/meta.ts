@@ -15,6 +15,8 @@ export default defineMeta({
     'pins',
     'custom-rows',
     'headless',
+    'nuxt',
+    'mobile',
     'styling',
     'keyboard-and-accessibility',
   ],

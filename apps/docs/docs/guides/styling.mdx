@@ -29,20 +29,20 @@ Every color, size and font in the theme is a `--cmdk-*` custom property. Overrid
 }
 ```
 
-| variable                                           | controls                                          |
-| -------------------------------------------------- | ------------------------------------------------- |
-| `--cmdk-font`, `--cmdk-font-mono`                  | Text, and the key caps and headings.              |
-| `--cmdk-width`, `--cmdk-max-height`                | The dialog's size.                                |
-| `--cmdk-top`                                       | The dialog's distance from the top of the window. |
-| `--cmdk-radius`, `--cmdk-row-radius`               | Corner rounding of the card and the rows.         |
-| `--cmdk-bg`, `--cmdk-bg-sunken`, `--cmdk-bg-hover` | Surfaces.                                         |
-| `--cmdk-fg`, `--cmdk-fg-muted`, `--cmdk-fg-faint`  | Text colors, strongest to weakest.                |
-| `--cmdk-border`, `--cmdk-border-strong`            | Dividers and outlines.                            |
-| `--cmdk-accent`, `--cmdk-accent-fg`                | The selected row, active chip, and focus marks.   |
-| `--cmdk-highlight`                                 | The color of matched text.                        |
-| `--cmdk-badge-bg`, `--cmdk-badge-fg`               | Badges.                                           |
-| `--cmdk-armed-bg`, `--cmdk-armed-fg`               | A row waiting for its second activation.          |
-| `--cmdk-overlay`, `--cmdk-shadow`                  | The backdrop and the dialog's shadow.             |
+| variable                                           | controls                                                                                                                                                         |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--cmdk-font`, `--cmdk-font-mono`                  | Text, and the key caps and headings.                                                                                                                             |
+| `--cmdk-width`, `--cmdk-max-height`                | The dialog's size. The list is capped at `--cmdk-max-height` (560px by default), and also at the visible height while open, so an on-screen keyboard shrinks it. |
+| `--cmdk-top`                                       | The dialog's distance from the top of the window.                                                                                                                |
+| `--cmdk-radius`, `--cmdk-row-radius`               | Corner rounding of the card and the rows.                                                                                                                        |
+| `--cmdk-bg`, `--cmdk-bg-sunken`, `--cmdk-bg-hover` | Surfaces.                                                                                                                                                        |
+| `--cmdk-fg`, `--cmdk-fg-muted`, `--cmdk-fg-faint`  | Text colors, strongest to weakest.                                                                                                                               |
+| `--cmdk-border`, `--cmdk-border-strong`            | Dividers and outlines.                                                                                                                                           |
+| `--cmdk-accent`, `--cmdk-accent-fg`                | The selected row, active chip, and focus marks.                                                                                                                  |
+| `--cmdk-highlight`                                 | The color of matched text.                                                                                                                                       |
+| `--cmdk-badge-bg`, `--cmdk-badge-fg`               | Badges.                                                                                                                                                          |
+| `--cmdk-armed-bg`, `--cmdk-armed-fg`               | A row waiting for its second activation.                                                                                                                         |
+| `--cmdk-overlay`, `--cmdk-shadow`                  | The backdrop and the dialog's shadow.                                                                                                                            |
 
 The dialog is teleported to `body`, so for a dialog, set variables on `:root` or `body` rather than on the component's parent. An inline palette picks them up from any ancestor.
 

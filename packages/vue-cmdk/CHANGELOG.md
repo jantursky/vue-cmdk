@@ -2,6 +2,21 @@
 
 All notable changes to `vue-cmdk` are listed here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-11-25
+
+### Added
+
+- New entry `vue-cmdk-palette/nuxt`: a Nuxt module (config key `cmdk`) that registers the components globally, auto-imports the composables, adds the stylesheet and installs one command registry per app instance. Options: `css`, `registry` and `prefix`. It needs Nuxt 3.13 or later, and `@nuxt/kit` is an optional peer dependency.
+- The search field sets `enterkeyhint="go"`.
+- While the dialog is open, its list height follows the visual viewport, so an on-screen keyboard shrinks the list instead of covering it.
+- The default theme hides the footer key hints and quick-select digits on touch-only devices, gives rows at least 44 px of height there, and uses the full width of screens up to 520 px, with safe-area insets.
+
+### Changed
+
+- Only mouse and pen movement changes the selection on hover. A finger dragged across rows to scroll no longer selects them. Tapping a row still activates it.
+- While the dialog is open, a touch drag outside the list no longer scrolls the page behind it, including on iOS Safari. A drag on the list stops at the list's end.
+- `--cmdk-max-height` defaults to `560px` instead of `min(560px, 100vh - 160px)`, and the list is also capped at the visible viewport height while open. Overrides keep working.
+
 ## [1.5.0] - 2026-11-15
 
 ### Added
@@ -106,6 +121,7 @@ The first version.
 - Replaceable labels for every built-in string.
 - An optional theme at `vue-cmdk-palette/style.css`, built on `--cmdk-*` variables, with light and dark modes and reduced-motion support.
 
+[1.6.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.6.0
 [1.5.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.5.0
 [1.4.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.4.0
 [1.3.0]: https://www.npmjs.com/package/vue-cmdk-palette/v/1.3.0

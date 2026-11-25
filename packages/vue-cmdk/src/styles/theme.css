@@ -9,7 +9,7 @@
   --cmdk-font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --cmdk-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --cmdk-width: 640px;
-  --cmdk-max-height: min(560px, calc(100vh - 160px));
+  --cmdk-max-height: 560px;
   --cmdk-top: 12vh;
   --cmdk-radius: 14px;
   --cmdk-row-radius: 9px;
@@ -93,8 +93,13 @@
   animation: cmdk-rise 140ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
 }
 
+/*
+ * The cap follows the visual viewport while the dialog is open, so an on-screen
+ * keyboard shrinks the list instead of hiding its last rows. Without
+ * visualViewport the variable is unset and the cap uses the dynamic viewport.
+ */
 [data-cmdk-dialog] [data-cmdk-root] {
-  max-height: var(--cmdk-max-height);
+  max-height: min(var(--cmdk-max-height), calc(var(--cmdk-viewport-height, 100dvh) - 160px));
   box-shadow: var(--cmdk-shadow);
 }
 
@@ -574,9 +579,32 @@
   color: var(--cmdk-fg-faint);
 }
 
+/* Touch-only devices: no keys to press, and rows are large enough for a finger. */
+@media (hover: none) and (pointer: coarse) {
+  [data-cmdk-hint],
+  [data-cmdk-scopes-hint],
+  [data-cmdk-quick] {
+    display: none;
+  }
+
+  [data-cmdk-item] {
+    min-height: 44px;
+  }
+}
+
 @media (max-width: 520px) {
   [data-cmdk-overlay] {
-    padding-top: 16px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-inline: 8px;
+    overscroll-behavior: contain;
+  }
+
+  [data-cmdk-dialog] {
+    width: 100%;
+  }
+
+  [data-cmdk-dialog] [data-cmdk-root] {
+    max-height: min(var(--cmdk-max-height), calc(var(--cmdk-viewport-height, 100dvh) - 120px));
   }
 
   [data-cmdk-scopes-hint],

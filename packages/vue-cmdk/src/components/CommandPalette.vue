@@ -74,8 +74,9 @@ const verb = computed(() => {
  */
 let aiming = false
 
-const onListPointer = (): void => {
-  aiming = true
+// A finger drags to scroll and never selects: only mouse and pen movement aims.
+const onListPointer = (event: PointerEvent): void => {
+  if (event.pointerType !== 'touch') aiming = true
 }
 
 const onListScroll = (): void => {

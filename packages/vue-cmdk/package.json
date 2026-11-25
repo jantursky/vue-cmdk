@@ -1,6 +1,6 @@
 {
   "name": "vue-cmdk-palette",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Lightweight, accessible command palette for Vue 3: headless composable plus a ready-made dialog component.",
   "license": "MIT",
   "author": {
@@ -42,6 +42,12 @@
         "default": "./dist/sources.cjs"
       }
     },
+    "./nuxt": {
+      "import": {
+        "types": "./dist/nuxt/module.d.ts",
+        "default": "./dist/nuxt/module.js"
+      }
+    },
     "./style.css": "./dist/style.css",
     "./package.json": "./package.json"
   },
@@ -65,21 +71,29 @@
     "headless"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && vite build --config vite.nuxt.config.ts",
+    "test:nuxt": "node test/nuxt/run.mjs",
     "test": "vitest run && vitest run --config vitest.ssr.config.ts",
     "test:watch": "vitest",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
     "test:coverage": "vitest run --coverage && vitest run --config vitest.ssr.config.ts",
     "test:browser": "vitest run --config vitest.browser.config.ts",
-    "lint:package": "publint --strict && attw --pack . --profile node16 --exclude-entrypoints style.css",
+    "lint:package": "publint --strict && attw --pack . --profile node16 --exclude-entrypoints style.css nuxt && attw --pack . --profile esm-only --entrypoints nuxt",
     "prepublishOnly": "bun run typecheck && bun run test && bun run build && bun run lint:package"
   },
   "peerDependencies": {
+    "@nuxt/kit": "^3.13.0 || ^4.0.0",
     "vue": "^3.5.0"
+  },
+  "peerDependenciesMeta": {
+    "@nuxt/kit": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@microsoft/api-extractor": "^7.59.4",
+    "@nuxt/kit": "^4.7.0",
     "@types/node": "^22",
     "@vitejs/plugin-vue": "^6",
     "@vitest/browser-playwright": "5.0.5",
@@ -87,13 +101,15 @@
     "@vue/test-utils": "^2",
     "axe-core": "^4.14.0",
     "happy-dom": "^21.0.4",
+    "nuxi": "^4.1.0",
+    "nuxt": "^4.7.0",
     "playwright": "^1.64.1",
     "publint": "^0.3.25",
     "typescript": "~5.9.3",
     "vite": "^8",
     "vite-plugin-dts": "^5",
     "vitest": "^5",
-    "vue": "^3.5.0",
+    "vue": "^3.5.46",
     "vue-tsc": "^3"
   }
 }

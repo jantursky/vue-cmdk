@@ -11,6 +11,10 @@ export default defineConfig(
       '**/dist/**',
       '**/coverage/**',
       '**/node_modules/**',
+      '**/.nuxt/**',
+      '**/.output/**',
+      // Outside the typed project, which the typed rules need; the fixture's own build checks it.
+      'packages/vue-cmdk/test/nuxt/**',
       'docs/**',
       'apps/docs/.blume/**',
       'apps/docs/.blume-verify/**',
